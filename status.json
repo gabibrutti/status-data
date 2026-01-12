@@ -1,42 +1,84 @@
-{
-  "services": {
-    "Interconexão entre Data Centers (SP1 e SP2)": "operational",
-    "Datacenter SP2": "operational",
-    "Datacenter SP1": "operational",
-    "ACS (Apache Cloud Stack)": "operational",
-    "vCloud": "operational",
-    "Central Telefônica": "operational",
-    "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "operational",
-    "VPN - Gerência console servidores físico Under": "degraded",
-    "Freshservice (painel de chamados), Interconexão entre Data Centers (SP1 e SP2)": "operational"
-  },
-  "incidents": [
-    {
-      "id": 2,
-      "title": "[INCIDENTE] 2",
-      "status": "degraded",
-      "state": "open",
-      "services": [
-        "VPN - Gerência console servidores físico Under"
-      ],
-      "message": "teste de incidente 2\n\n_No response_",
-      "timestamp": "2026-01-12T20:02:08Z",
-      "updated_at": "2026-01-12T20:02:08Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/2"
-    },
-    {
-      "id": 1,
-      "title": "[INCIDENTE]",
-      "status": "degraded",
-      "state": "closed",
-      "services": [
-        "Freshservice (painel de chamados), Interconexão entre Data Centers (SP1 e SP2)"
-      ],
-      "message": "teste de incidente\n\n_No response_",
-      "timestamp": "2026-01-12T19:58:46Z",
-      "updated_at": "2026-01-12T20:01:49Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/1"
-    }
-  ]
-}
+name: Sync status.json from issues
+on:
+  issues:
+    types: [opened, edited, closed, reopened, deleted]
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update status.json
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100
+            });
+
+            // Lista oficial de serviços da sua página
+            const services = {
+              "Interconexão entre Data Centers (SP1 e SP2)": "operational",
+              "Datacenter SP2": "operational",
+              "Datacenter SP1": "operational",
+              "ACS (Apache Cloud Stack)": "operational",
+              "vCloud": "operational",
+              "Central Telefônica": "operational",
+              "Freshservice (painel de chamados)": "operational",
+              "Under Control (Painel administrativo)": "operational",
+              "VPN - Gerência console servidores físico Under": "operational"
+            };
+
+            const incidents = [];
+
+            // Filtra apenas issues abertas com o prefixo [INCIDENTE]
+            for (const issue of issues.data) {
+              if (issue.title.includes('[INCIDENTE]')) {
+                // Se a issue estiver aberta, pegamos os serviços afetados
+                if (issue.state === 'open') {
+                  const body = issue.body || "";
+                  const severityMatch = body.match(/Severidade\s*\n*(.*)/i);
+                  const servicesMatch = body.match(/Serviços afetados\s*\n*(.*)/i);
+                  
+                  const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
+                  const affected = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
+
+                  affected.forEach(s => {
+                    if (services[s]) services[s] = severity;
+                  });
+                }
+
+                // Adiciona ao histórico (JSON)
+                incidents.push({
+                  title: issue.title.replace('[INCIDENTE]', '').trim(),
+                  status: issue.state === 'open' ? 'investigating' : 'resolved',
+                  state: issue.state,
+                  timestamp: issue.created_at,
+                  updated_at: issue.updated_at
+                });
+              }
+            }
+
+            const statusData = {
+              last_updated: new Date().toISOString(),
+              services: services,
+              incidents: incidents.slice(0, 10)
+            };
+
+            fs.writeFileSync('status.json', JSON.stringify(statusData, null, 2));
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add status.json
+          git commit -m "Update status.json from issues" || exit 0
+          git push
