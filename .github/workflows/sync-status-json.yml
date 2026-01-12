@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Permite que o robô veja todo o histórico e evite conflitos
+          fetch-depth: 0
 
       - name: Update status.json
         uses: actions/github-script@v7
@@ -78,7 +78,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git pull --rebase origin main # ESTA LINHA RESOLVE O PROBLEMA PARA SEMPRE
+          git pull --rebase origin main
           git add status.json
           git commit -m "Update status.json from issues" || exit 0
           git push
