@@ -1,0 +1,56 @@
+name: "Registrar incidente"
+description: "Registrar uma instabilidade/incidente na página de status"
+title: "[INCIDENTE] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Preencha os campos abaixo.
+
+        - Para **finalizar** um incidente, basta **fechar** esta issue.
+        - Para **corrigir informações**, edite a issue.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severidade"
+      description: "Como o incidente afeta os usuários?"
+      options:
+        - degraded
+        - partial
+        - major
+        - maintenance
+    validations:
+      required: true
+
+  - type: dropdown
+    id: services
+    attributes:
+      label: "Serviços afetados"
+      description: "Selecione um ou mais serviços"
+      multiple: true
+      options:
+        - Website
+        - API
+        - Banco de Dados
+        - Autenticação
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descrição do incidente"
+      description: "Explique o que está acontecendo e o impacto."
+      placeholder: "Ex: Intermitência na autenticação; alguns usuários não conseguem acessar..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: update
+    attributes:
+      label: "Atualização (opcional)"
+      description: "Se quiser, descreva ações em andamento (Investigando/Identificado/Monitorando/etc.)."
+      placeholder: "Ex: Investigando a causa raiz. Próxima atualização em 30min."
+    validations:
+      required: false
