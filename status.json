@@ -9,20 +9,20 @@
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational",
-    "Freshservice (painel de chamados), Interconexão entre Data Centers (SP1 e SP2)": "degraded"
+    "Freshservice (painel de chamados), Interconexão entre Data Centers (SP1 e SP2)": "operational"
   },
   "incidents": [
     {
       "id": 1,
       "title": "[INCIDENTE]",
       "status": "degraded",
-      "state": "open",
+      "state": "closed",
       "services": [
         "Freshservice (painel de chamados), Interconexão entre Data Centers (SP1 e SP2)"
       ],
       "message": "teste de incidente\n\n_No response_",
       "timestamp": "2026-01-12T19:58:46Z",
-      "updated_at": "2026-01-12T19:58:46Z",
+      "updated_at": "2026-01-12T20:01:49Z",
       "url": "https://github.com/gabibrutti/status-data/issues/1"
     }
   ]
