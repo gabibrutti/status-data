@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Garante que ele veja todo o histórico para evitar conflitos
 
       - name: Update status.json
         uses: actions/github-script@v7
@@ -24,7 +26,6 @@ jobs:
               per_page: 100
             });
 
-            // Lista exata de serviços para garantir o vínculo
             const services = {
               "Interconexão entre Data Centers (SP1 e SP2)": "operational",
               "Datacenter SP2": "operational",
@@ -42,10 +43,8 @@ jobs:
             for (const issue of issues.data) {
               if (issue.title.includes('[INCIDENTE]')) {
                 const body = issue.body || "";
-                
-                // Regex melhorada: captura o valor independente de espaços ou quebras de linha extras
-                const severityMatch = body.match(/(?:### Severidade|Severidade)\s*[\r\n]+([^\r\n]+)/i);
-                const servicesMatch = body.match(/(?:### Serviços afetados|Serviços afetados)\s*[\r\n]+([^\r\n]+)/i);
+                const severityMatch = body.match(/(?:### Severidade|Severidade)\s*[\r\n]+[\s]*([^\s\r\n]+)/i);
+                const servicesMatch = body.match(/(?:### Serviços afetados|Serviços afetados)\s*[\r\n]+[\s]*([^\r\n]+)/i);
                 
                 const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
                 const affectedStr = servicesMatch ? servicesMatch[1].trim() : '';
@@ -53,10 +52,7 @@ jobs:
 
                 if (issue.state === 'open') {
                   affected.forEach(serviceName => {
-                    // Só altera se o nome for IGUAL ao da lista acima
-                    if (services[serviceName]) {
-                      services[serviceName] = severity;
-                    }
+                    if (services[serviceName]) services[serviceName] = severity;
                   });
                 }
 
@@ -82,6 +78,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
+          git pull --rebase origin main # PUXA SUAS MUDANÇAS MANUAIS ANTES DE ENVIAR
           git add status.json
           git commit -m "Update status.json from issues" || exit 0
           git push
