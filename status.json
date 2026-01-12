@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-12T20:13:45.475Z",
+  "last_updated": "2026-01-12T20:19:44.503Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
@@ -8,34 +8,27 @@
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "maintenance",
+    "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": [
     {
-      "title": "2",
-      "status": "investigating",
-      "state": "open",
-      "timestamp": "2026-01-12T20:13:37Z",
-      "updated_at": "2026-01-12T20:13:37Z"
-    },
-    {
       "title": "",
-      "status": "resolved",
+      "status": "major",
       "state": "closed",
       "timestamp": "2026-01-12T20:06:54Z",
       "updated_at": "2026-01-12T20:09:37Z"
     },
     {
       "title": "2",
-      "status": "resolved",
+      "status": "degraded",
       "state": "closed",
       "timestamp": "2026-01-12T20:02:08Z",
       "updated_at": "2026-01-12T20:05:42Z"
     },
     {
       "title": "",
-      "status": "resolved",
+      "status": "degraded",
       "state": "closed",
       "timestamp": "2026-01-12T19:58:46Z",
       "updated_at": "2026-01-12T20:01:49Z"
