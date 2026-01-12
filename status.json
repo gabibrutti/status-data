@@ -8,10 +8,23 @@
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
-    "VPN - Gerência console servidores físico Under": "operational",
+    "VPN - Gerência console servidores físico Under": "degraded",
     "Freshservice (painel de chamados), Interconexão entre Data Centers (SP1 e SP2)": "operational"
   },
   "incidents": [
+    {
+      "id": 2,
+      "title": "[INCIDENTE] 2",
+      "status": "degraded",
+      "state": "open",
+      "services": [
+        "VPN - Gerência console servidores físico Under"
+      ],
+      "message": "teste de incidente 2\n\n_No response_",
+      "timestamp": "2026-01-12T20:02:08Z",
+      "updated_at": "2026-01-12T20:02:08Z",
+      "url": "https://github.com/gabibrutti/status-data/issues/2"
+    },
     {
       "id": 1,
       "title": "[INCIDENTE]",
