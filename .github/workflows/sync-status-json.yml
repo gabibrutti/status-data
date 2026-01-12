@@ -24,6 +24,7 @@ jobs:
               per_page: 100
             });
 
+            // Lista exata de serviços para garantir o vínculo
             const services = {
               "Interconexão entre Data Centers (SP1 e SP2)": "operational",
               "Datacenter SP2": "operational",
@@ -42,16 +43,20 @@ jobs:
               if (issue.title.includes('[INCIDENTE]')) {
                 const body = issue.body || "";
                 
-                // Melhoria na captura: procura o texto após os cabeçalhos do formulário
-                const severityMatch = body.match(/### Severidade\s*\n*(.*)/i) || body.match(/Severidade\s*\n*(.*)/i);
-                const servicesMatch = body.match(/### Serviços afetados\s*\n*(.*)/i) || body.match(/Serviços afetados\s*\n*(.*)/i);
+                // Regex melhorada: captura o valor independente de espaços ou quebras de linha extras
+                const severityMatch = body.match(/(?:### Severidade|Severidade)\s*[\r\n]+([^\r\n]+)/i);
+                const servicesMatch = body.match(/(?:### Serviços afetados|Serviços afetados)\s*[\r\n]+([^\r\n]+)/i);
                 
                 const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
-                const affected = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
+                const affectedStr = servicesMatch ? servicesMatch[1].trim() : '';
+                const affected = affectedStr.split(',').map(s => s.trim());
 
                 if (issue.state === 'open') {
-                  affected.forEach(s => {
-                    if (services[s]) services[s] = severity;
+                  affected.forEach(serviceName => {
+                    // Só altera se o nome for IGUAL ao da lista acima
+                    if (services[serviceName]) {
+                      services[serviceName] = severity;
+                    }
                   });
                 }
 
