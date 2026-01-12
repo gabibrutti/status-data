@@ -1,24 +1,17 @@
 {
-  "last_updated": "2026-01-12T20:12:14.975Z",
+  "last_updated": "2026-01-12T20:13:04.857Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
     "ACS (Apache Cloud Stack)": "operational",
-    "vCloud": "major",
+    "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": [
-    {
-      "title": "",
-      "status": "investigating",
-      "state": "open",
-      "timestamp": "2026-01-12T20:12:04Z",
-      "updated_at": "2026-01-12T20:12:04Z"
-    },
     {
       "title": "",
       "status": "resolved",
