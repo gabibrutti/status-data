@@ -40,23 +40,24 @@ jobs:
 
             for (const issue of issues.data) {
               if (issue.title.includes('[INCIDENTE]')) {
-                if (issue.state === 'open') {
-                  const body = issue.body || "";
-                  const severityMatch = body.match(/Severidade\s*\n*(.*)/i);
-                  const servicesMatch = body.match(/Serviços afetados\s*\n*(.*)/i);
-                  
-                  const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
-                  // Divide por vírgula para aceitar múltiplos serviços
-                  const affected = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
+                const body = issue.body || "";
+                
+                // Melhoria na captura: procura o texto após os cabeçalhos do formulário
+                const severityMatch = body.match(/### Severidade\s*\n*(.*)/i) || body.match(/Severidade\s*\n*(.*)/i);
+                const servicesMatch = body.match(/### Serviços afetados\s*\n*(.*)/i) || body.match(/Serviços afetados\s*\n*(.*)/i);
+                
+                const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
+                const affected = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
 
+                if (issue.state === 'open') {
                   affected.forEach(s => {
-                    if (services[s]) services[s] = (severity === 'major') ? 'major' : severity;
+                    if (services[s]) services[s] = severity;
                   });
                 }
 
                 incidents.push({
                   title: issue.title.replace('[INCIDENTE]', '').trim(),
-                  status: issue.state === 'open' ? 'investigating' : 'resolved',
+                  status: severity,
                   state: issue.state,
                   timestamp: issue.created_at,
                   updated_at: issue.updated_at
