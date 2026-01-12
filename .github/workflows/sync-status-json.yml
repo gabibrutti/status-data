@@ -73,7 +73,6 @@ jobs:
             };
 
             fs.writeFileSync('status.json', JSON.stringify(statusData, null, 2));
-
 - name: Commit and push changes
         run: |
           git config --global user.name "GitHub Action"
