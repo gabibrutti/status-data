@@ -1,41 +1,81 @@
 name: Sync status.json from issues
-
 on:
   issues:
-    types: [opened, edited, reopened, closed]
-
-permissions:
-  contents: write
-  issues: read
+    types: [opened, edited, closed, reopened, deleted]
 
 jobs:
-  sync:
+  update-json:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Update status.json
+        uses: actions/github-script@v7
         with:
-          node-version: 20
+          script: |
+            const fs = require('fs');
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100
+            });
 
-      - name: Sync status.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: node scripts/sync-incident.mjs
+            const services = {
+              "Interconexão entre Data Centers (SP1 e SP2)": "operational",
+              "Datacenter SP2": "operational",
+              "Datacenter SP1": "operational",
+              "ACS (Apache Cloud Stack)": "operational",
+              "vCloud": "operational",
+              "Central Telefônica": "operational",
+              "Freshservice (painel de chamados)": "operational",
+              "Under Control (Painel administrativo)": "operational",
+              "VPN - Gerência console servidores físico Under": "operational"
+            };
 
-      - name: Commit changes (if any)
+            const incidents = [];
+
+            for (const issue of issues.data) {
+              if (issue.title.includes('[INCIDENTE]')) {
+                if (issue.state === 'open') {
+                  const body = issue.body || "";
+                  const severityMatch = body.match(/Severidade\s*\n*(.*)/i);
+                  const servicesMatch = body.match(/Serviços afetados\s*\n*(.*)/i);
+                  
+                  const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
+                  // Divide por vírgula para aceitar múltiplos serviços
+                  const affected = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
+
+                  affected.forEach(s => {
+                    if (services[s]) services[s] = (severity === 'major') ? 'major' : severity;
+                  });
+                }
+
+                incidents.push({
+                  title: issue.title.replace('[INCIDENTE]', '').trim(),
+                  status: issue.state === 'open' ? 'investigating' : 'resolved',
+                  state: issue.state,
+                  timestamp: issue.created_at,
+                  updated_at: issue.updated_at
+                });
+              }
+            }
+
+            const statusData = {
+              last_updated: new Date().toISOString(),
+              services: services,
+              incidents: incidents.slice(0, 10)
+            };
+
+            fs.writeFileSync('status.json', JSON.stringify(statusData, null, 2));
+
+      - name: Commit and push changes
         run: |
-          if git diff --quiet; then
-            echo "No changes"
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
           git add status.json
-          git commit -m "sync: update status.json"
+          git commit -m "Update status.json from issues" || exit 0
           git push
