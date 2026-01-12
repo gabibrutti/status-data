@@ -1,0 +1,9 @@
+{
+  "services": {
+    "Website": "operational",
+    "API": "operational",
+    "Banco de Dados": "operational",
+    "Autenticação": "operational"
+  },
+  "incidents": []
+}
