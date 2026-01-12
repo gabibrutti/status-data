@@ -70,9 +70,7 @@ jobs:
               last_updated: new Date().toISOString(),
               services: services,
               incidents: incidents.slice(0, 10)
-            };
-
-            fs.writeFileSync('status.json', JSON.stringify(statusData, null, 2));
+            }; fs.writeFileSync('status.json', JSON.stringify(statusData, null, 2));
 
       - name: Commit and push changes
         run: |
