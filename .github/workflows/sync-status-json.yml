@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Permite que o robô veja todo o histórico e evite conflitos
 
       - name: Update status.json
         uses: actions/github-script@v7
@@ -45,7 +45,7 @@ jobs:
                 const body = issue.body || "";
                 const severityMatch = body.match(/(?:### Severidade|Severidade)\s*[\r\n]+[\s]*([^\s\r\n]+)/i);
                 const servicesMatch = body.match(/(?:### Serviços afetados|Serviços afetados)\s*[\r\n]+[\s]*([^\r\n]+)/i);
-
+                
                 const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'degraded';
                 const affectedStr = servicesMatch ? servicesMatch[1].trim() : '';
                 const affected = affectedStr.split(',').map(s => s.trim());
@@ -78,7 +78,7 @@ jobs:
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git pull --rebase origin main
+          git pull --rebase origin main # ESTA LINHA RESOLVE O PROBLEMA PARA SEMPRE
           git add status.json
           git commit -m "Update status.json from issues" || exit 0
           git push
