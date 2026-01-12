@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status - Under</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://under.com.br/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'under-blue': '#0056b3',
+                        'under-dark': '#1a202c',
+                        'under-gray': '#4a5568',
+                        'under-light': '#f7fafc',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444',
+                        'info': '#3b82f6',
+                        'maintenance': '#8b5cf6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fc;
+            background-image: 
+                linear-gradient(45deg, rgba(9, 30, 66, 0.02) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(9, 30, 66, 0.02) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(9, 30, 66, 0.02) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(9, 30, 66, 0.02) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+
+        .service-card {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease-in-out;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+        }
+
+        .service-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .status-operational {
+            background-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        
+        .status-degraded {
+            background-color: #F59E0B;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+        
+        .status-partial {
+            background-color: #F97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        }
+        
+        .status-major {
+            background-color: #EF4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .status-outage {
+            background-color: #EF4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+        
+        .status-maintenance {
+            background-color: #8B5CF6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%);
+            transition: width 0.6s ease;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @media (max-width: 640px) {
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <a href="https://under.com.br" target="_blank" class="flex-shrink-0">
+                            <img src="https://under.com.br/wp-content/uploads/2021/10/logo-under.png" alt="Under Logo" class="h-8">
+                        </a>
+                        <div class="h-6 w-px bg-gray-200"></div>
+                        <h1 class="text-lg font-semibold text-gray-900">Status Page</h1>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <span class="hidden sm:inline">Atualizado em </span>
+                        <span id="current-time" class="font-medium"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-6 py-8">
+                <div class="flex flex-col space-y-6">
+                    <div class="flex flex-col space-y-2">
+                        <h2 class="text-2xl font-semibold text-gray-900">Status dos Serviços</h2>
+                        <p class="text-gray-600">Visão geral da saúde dos sistemas e serviços da Under</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg border border-blue-100 p-6">
+                        <div class="flex items-center space-x-4">
+                            <div id="overall-status-icon" class="p-3 rounded-full bg-green-100">
+                                <svg id="overall-status-icon-svg" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 id="overall-status-title" class="text-lg font-medium text-gray-900">Carregando status...</h3>
+                                <p id="overall-status-subtitle" class="text-sm text-gray-600">Aguarde</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">Histórico de Incidentes</h2>
+                                <p class="text-sm text-gray-500 mt-1">Registro de interrupções e manutenções recentes</p>
+                            </div>
+                            <a href="https://github.com/gabibrutti/status-data/issues/new?template=report-incident.yml" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="-ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Novo incidente
+                            </a>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div class="px-6 py-5" id="incidents-summary">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center" id="incidents-summary-icon">
+                                            <svg class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="incidents-summary-icon-svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-base font-medium text-gray-900" id="incidents-summary-title">Carregando...</h3>
+                                        <div class="mt-1 text-sm text-gray-500" id="incidents-summary-description"></div>
+                                        <div class="mt-2 flex items-center text-xs text-gray-500">
+                                            <span>Atualizado em <time id="incidents-summary-time"></time></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <a href="https://github.com/gabibrutti/status-data/issues" target="_blank" class="text-sm font-medium text-blue-600 hover:text-blue-700">Ver histórico completo de incidentes</a>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                            <div class="flex items-center space-x-2 text-green-600">
+                                <span class="status-dot status-operational"></span>
+                                <span class="text-sm font-medium">Operacional</span>
+                            </div>
+                            <div class="mt-2 text-2xl font-semibold text-gray-900" id="stat-operational">-</div>
+                            <div class="text-xs text-gray-500">Serviços</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                            <div class="flex items-center space-x-2 text-yellow-500">
+                                <span class="status-dot status-degraded"></span>
+                                <span class="text-sm font-medium">Degradado</span>
+                            </div>
+                            <div class="mt-2 text-2xl font-semibold text-gray-900" id="stat-degraded">-</div>
+                            <div class="text-xs text-gray-500">Serviços</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                            <div class="flex items-center space-x-2 text-red-500">
+                                <span class="status-dot status-outage"></span>
+                                <span class="text-sm font-medium">Indisponível</span>
+                            </div>
+                            <div class="mt-2 text-2xl font-semibold text-gray-900" id="stat-major">-</div>
+                            <div class="text-xs text-gray-500">Serviços</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                            <div class="flex items-center space-x-2 text-purple-600">
+                                <span class="status-dot status-maintenance"></span>
+                                <span class="text-sm font-medium">Manutenção</span>
+                            </div>
+                            <div class="mt-2 text-2xl font-semibold text-gray-900" id="stat-maintenance">-</div>
+                            <div class="text-xs text-gray-500">Serviços</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="flex-grow max-w-7xl mx-auto py-6 px-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Serviços e Componentes</h2>
+                    <p class="text-sm text-gray-500 mt-1">Status de todos os serviços monitorados</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <input type="text" placeholder="Buscar serviços..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-group="Conectividade">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6h2m7-6h2m4-2h2m0 6h-2m0 6h-2m-8 0H5v-2m0-6H3v-2h2m0-6h2m11 8a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">Conectividade</h3>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" data-group-badge="Conectividade">
+                            <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5" data-group-dot="Conectividade"></span>
+                            <span data-group-text="Conectividade">Operacional</span>
+                        </span>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-100">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="Interconexão entre Data Centers (SP1 e SP2)" data-group-service="Conectividade">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900 truncate">Interconexão entre Data Centers (SP1 e SP2)</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="Interconexão entre Data Centers (SP1 e SP2)">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="Datacenter SP2" data-group-service="Conectividade">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">Datacenter SP2</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>99.95% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="Datacenter SP2">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 99.95%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">99.95%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="Datacenter SP1" data-group-service="Conectividade">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">Datacenter SP1</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>99.95% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="Datacenter SP1">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 99.95%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">99.95%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-group="Plataforma Cloud">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">Plataforma Cloud</h3>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" data-group-badge="Plataforma Cloud">
+                            <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5" data-group-dot="Plataforma Cloud"></span>
+                            <span data-group-text="Plataforma Cloud">Operacional</span>
+                        </span>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-100">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="ACS (Apache Cloud Stack)" data-group-service="Plataforma Cloud">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">ACS (Apache Cloud Stack)</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="ACS (Apache Cloud Stack)">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="vCloud" data-group-service="Plataforma Cloud">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">vCloud</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="vCloud">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-group="Central de Atendimento">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">Central de Atendimento</h3>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" data-group-badge="Central de Atendimento">
+                            <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5" data-group-dot="Central de Atendimento"></span>
+                            <span data-group-text="Central de Atendimento">Operacional</span>
+                        </span>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-100">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="Central Telefônica" data-group-service="Central de Atendimento">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">Central Telefônica</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="Central Telefônica">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="Freshservice (painel de chamados)" data-group-service="Central de Atendimento">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">Freshservice (painel de chamados)</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="Freshservice (painel de chamados)">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="Under Control (Painel administrativo)" data-group-service="Central de Atendimento">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">Under Control (Painel administrativo)</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="Under Control (Painel administrativo)">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden" data-group="VPN">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">VPN</h3>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" data-group-badge="VPN">
+                            <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5" data-group-dot="VPN"></span>
+                            <span data-group-text="VPN">Operacional</span>
+                        </span>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-100">
+                        <div class="px-6 py-4 hover:bg-gray-50 transition-colors" data-service-row="VPN - Gerência console servidores físico Under" data-group-service="VPN">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-base font-medium text-gray-900">VPN - Gerência console servidores físico Under</h4>
+                                    <div class="mt-1 flex flex-wrap items-center text-sm text-gray-500">
+                                        <span>100% de disponibilidade</span>
+                                        <span class="mx-2">•</span>
+                                        <span>últimos 7 dias</span>
+                                        <span class="mx-2">•</span>
+                                        <span class="font-medium" data-service-status="VPN - Gerência console servidores físico Under">-</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex items-center">
+                                    <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500" style="width: 100%"></div>
+                                    </div>
+                                    <span class="ml-2 text-sm font-medium text-gray-900">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-white border-t border-gray-100 mt-16">
+            <div class="max-w-7xl mx-auto py-8 px-6">
+                <div class="border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
+                    <div class="flex justify-center space-x-6 md:order-2">
+                        <a href="#" class="text-gray-500 hover:text-gray-600">
+                            <span class="sr-only">Termos de Uso</span>
+                            <span class="text-sm">Termos</span>
+                        </a>
+                        <span class="inline-flex items-center text-gray-400">•</span>
+                        <a href="#" class="text-gray-500 hover:text-gray-600">
+                            <span class="sr-only">Política de Privacidade</span>
+                            <span class="text-sm">Privacidade</span>
+                        </a>
+                        <span class="inline-flex items-center text-gray-400">•</span>
+                        <a href="#" class="text-gray-500 hover:text-gray-600">
+                            <span class="sr-only">Contato</span>
+                            <span class="text-sm">Contato</span>
+                        </a>
+                    </div>
+                    <div class="mt-8 md:mt-0 md:order-1">
+                        <p class="text-center text-sm text-gray-500">
+                            &copy; 2023 Under. Todos os direitos reservados.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-center">
+                    <a href="https://under.com.br" target="_blank" class="inline-flex items-center">
+                        <img src="https://under.com.br/wp-content/uploads/2021/10/logo-under.png" alt="Under Logo" class="h-6">
+                        <span class="ml-2 text-sm text-gray-500">Powered by Under</span>
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false
+            };
+            document.getElementById('current-time').textContent = now.toLocaleString('pt-BR', options);
+            setTimeout(updateDateTime, 60000);
+        }
+
+        function severityRank(status) {
+            const order = { operational: 0, degraded: 1, maintenance: 2, partial: 3, major: 4 };
+            return order[status] ?? 0;
+        }
+
+        function labelFor(status) {
+            const map = {
+                operational: 'Operacional',
+                degraded: 'Degradado',
+                partial: 'Parcial',
+                major: 'Indisponível',
+                maintenance: 'Manutenção'
+            };
+            return map[status] || status;
+        }
+
+        function styleBadge(el, status) {
+            if (!el) return;
+
+            const styles = {
+                operational: { wrap: 'bg-green-100 text-green-800', dot: 'bg-green-500' },
+                degraded: { wrap: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500' },
+                partial: { wrap: 'bg-orange-100 text-orange-800', dot: 'bg-orange-500' },
+                major: { wrap: 'bg-red-100 text-red-800', dot: 'bg-red-500' },
+                maintenance: { wrap: 'bg-purple-100 text-purple-800', dot: 'bg-purple-500' }
+            };
+
+            const s = styles[status] || styles.operational;
+
+            el.className = `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${s.wrap}`;
+        }
+
+        function formatPtBr(dateString) {
+            const d = new Date(dateString);
+            const opts = { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return d.toLocaleString('pt-BR', opts);
+        }
+
+        async function loadStatus() {
+            const res = await fetch(`./status.json?t=${Date.now()}`);
+            if (!res.ok) throw new Error('Não foi possível carregar status.json');
+            return await res.json();
+        }
+
+        function applyStatus(data) {
+            const services = data?.services || {};
+            const incidents = data?.incidents || [];
+
+            let overall = 'operational';
+            for (const st of Object.values(services)) {
+                if (severityRank(st) > severityRank(overall)) overall = st;
+            }
+
+            const overallTitle = document.getElementById('overall-status-title');
+            const overallSubtitle = document.getElementById('overall-status-subtitle');
+            const iconWrap = document.getElementById('overall-status-icon');
+            const iconSvg = document.getElementById('overall-status-icon-svg');
+
+            if (overall === 'operational') {
+                iconWrap.className = 'p-3 rounded-full bg-green-100';
+                iconSvg.className = 'h-6 w-6 text-green-600';
+                overallTitle.textContent = 'Todos os sistemas operando normalmente';
+                overallSubtitle.textContent = 'Nenhum incidente reportado';
+            } else {
+                const colors = {
+                    degraded: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
+                    partial: { bg: 'bg-orange-100', text: 'text-orange-700' },
+                    major: { bg: 'bg-red-100', text: 'text-red-700' },
+                    maintenance: { bg: 'bg-purple-100', text: 'text-purple-700' },
+                };
+                const c = colors[overall] || colors.degraded;
+                iconWrap.className = `p-3 rounded-full ${c.bg}`;
+                iconSvg.className = `h-6 w-6 ${c.text}`;
+                overallTitle.textContent = `Atenção: ${labelFor(overall)}`;
+                overallSubtitle.textContent = 'Há incidentes em andamento';
+            }
+
+            const statOperational = document.getElementById('stat-operational');
+            const statDegraded = document.getElementById('stat-degraded');
+            const statMajor = document.getElementById('stat-major');
+            const statMaintenance = document.getElementById('stat-maintenance');
+
+            const counts = { operational: 0, degraded: 0, partial: 0, major: 0, maintenance: 0 };
+            for (const st of Object.values(services)) {
+                if (counts[st] === undefined) continue;
+                counts[st] += 1;
+            }
+
+            statOperational.textContent = String(counts.operational);
+            statDegraded.textContent = String(counts.degraded + counts.partial);
+            statMajor.textContent = String(counts.major);
+            statMaintenance.textContent = String(counts.maintenance);
+
+            const serviceEls = document.querySelectorAll('[data-service-status]');
+            for (const el of serviceEls) {
+                const key = el.getAttribute('data-service-status');
+                el.textContent = labelFor(services[key] || 'operational');
+            }
+
+            const groups = {};
+            const groupServiceEls = document.querySelectorAll('[data-group-service]');
+            for (const el of groupServiceEls) {
+                const group = el.getAttribute('data-group-service');
+                const service = el.getAttribute('data-service-row');
+                groups[group] = groups[group] || [];
+                groups[group].push(service);
+            }
+
+            for (const [groupName, groupServices] of Object.entries(groups)) {
+                let groupStatus = 'operational';
+                for (const s of groupServices) {
+                    const st = services[s] || 'operational';
+                    if (severityRank(st) > severityRank(groupStatus)) groupStatus = st;
+                }
+
+                const badge = document.querySelector(`[data-group-badge="${CSS.escape(groupName)}"]`);
+                const dot = document.querySelector(`[data-group-dot="${CSS.escape(groupName)}"]`);
+                const txt = document.querySelector(`[data-group-text="${CSS.escape(groupName)}"]`);
+
+                styleBadge(badge, groupStatus);
+                if (dot) {
+                    const dotClass = {
+                        operational: 'bg-green-500',
+                        degraded: 'bg-yellow-500',
+                        partial: 'bg-orange-500',
+                        major: 'bg-red-500',
+                        maintenance: 'bg-purple-500'
+                    }[groupStatus] || 'bg-green-500';
+                    dot.className = `w-2 h-2 rounded-full ${dotClass} mr-1.5`;
+                }
+                if (txt) txt.textContent = labelFor(groupStatus);
+            }
+
+            const summaryTitle = document.getElementById('incidents-summary-title');
+            const summaryDescription = document.getElementById('incidents-summary-description');
+            const summaryTime = document.getElementById('incidents-summary-time');
+            const summaryIcon = document.getElementById('incidents-summary-icon');
+            const summaryIconSvg = document.getElementById('incidents-summary-icon-svg');
+
+            const mostRecent = incidents[0];
+            const openIncidents = incidents.filter((i) => i.state === 'open');
+
+            if (!mostRecent) {
+                summaryTitle.textContent = 'Todos os sistemas operando normalmente';
+                summaryDescription.innerHTML = '<p>Nenhum incidente reportado nos últimos 7 dias.</p>';
+                summaryTime.textContent = formatPtBr(new Date().toISOString());
+                summaryIcon.className = 'h-8 w-8 rounded-full bg-green-100 flex items-center justify-center';
+                summaryIconSvg.className = 'h-5 w-5 text-green-500';
+                return;
+            }
+
+            if (openIncidents.length === 0) {
+                summaryTitle.textContent = 'Sem incidentes em andamento';
+                summaryDescription.innerHTML = '<p>Não há incidentes abertos no momento.</p>';
+                summaryTime.textContent = formatPtBr(mostRecent.updated_at || mostRecent.timestamp);
+                summaryIcon.className = 'h-8 w-8 rounded-full bg-green-100 flex items-center justify-center';
+                summaryIconSvg.className = 'h-5 w-5 text-green-500';
+                return;
+            }
+
+            let openSeverity = 'degraded';
+            for (const inc of openIncidents) {
+                if (severityRank(inc.status) > severityRank(openSeverity)) openSeverity = inc.status;
+            }
+
+            const iconColors = {
+                degraded: { wrap: 'bg-yellow-100', svg: 'text-yellow-500' },
+                partial: { wrap: 'bg-orange-100', svg: 'text-orange-500' },
+                major: { wrap: 'bg-red-100', svg: 'text-red-500' },
+                maintenance: { wrap: 'bg-purple-100', svg: 'text-purple-500' }
+            };
+            const ic = iconColors[openSeverity] || iconColors.degraded;
+
+            summaryIcon.className = `h-8 w-8 rounded-full ${ic.wrap} flex items-center justify-center`;
+            summaryIconSvg.className = `h-5 w-5 ${ic.svg}`;
+
+            summaryTitle.textContent = `${openIncidents.length} incidente(s) em andamento`;
+            summaryDescription.innerHTML = openIncidents
+                .slice(0, 3)
+                .map((i) => `<p><strong>${i.title}</strong> — ${labelFor(i.status)}</p>`)
+                .join('');
+            summaryTime.textContent = formatPtBr(openIncidents[0].updated_at || openIncidents[0].timestamp);
+        }
+
+        async function refresh() {
+            try {
+                const data = await loadStatus();
+                applyStatus(data);
+            } catch (e) {
+                const overallTitle = document.getElementById('overall-status-title');
+                const overallSubtitle = document.getElementById('overall-status-subtitle');
+                overallTitle.textContent = 'Erro ao carregar status';
+                overallSubtitle.textContent = 'Tente novamente mais tarde';
+            }
+        }
+
+        updateDateTime();
+        refresh();
+        setInterval(refresh, 60000);
+    </script>
+</body>
+</html>

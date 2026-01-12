@@ -30,10 +30,15 @@ body:
       description: "Selecione um ou mais serviços"
       multiple: true
       options:
-        - Website
-        - API
-        - Banco de Dados
-        - Autenticação
+        - Interconexão entre Data Centers (SP1 e SP2)
+        - Datacenter SP2
+        - Datacenter SP1
+        - ACS (Apache Cloud Stack)
+        - vCloud
+        - Central Telefônica
+        - Freshservice (painel de chamados)
+        - Under Control (Painel administrativo)
+        - VPN - Gerência console servidores físico Under
     validations:
       required: true
 
