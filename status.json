@@ -1,19 +1,19 @@
 {
   "services": {
-    "Interconexão entre Data Centers (SP1 e SP2)": "major"
+    "Interconexão entre Data Centers (SP1 e SP2)": "operational"
   },
   "incidents": [
     {
       "id": 3,
       "title": "[INCIDENTE]",
       "status": "major",
-      "state": "open",
+      "state": "closed",
       "services": [
         "Interconexão entre Data Centers (SP1 e SP2)"
       ],
       "message": "teste 3\n\n_No response_",
       "timestamp": "2026-01-12T20:06:54Z",
-      "updated_at": "2026-01-12T20:06:54Z",
+      "updated_at": "2026-01-12T20:09:37Z",
       "url": "https://github.com/gabibrutti/status-data/issues/3"
     },
     {
