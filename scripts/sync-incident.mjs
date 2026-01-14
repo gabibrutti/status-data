@@ -19,12 +19,8 @@ const SUPPORTED_SERVICES_SET = new Set(SUPPORTED_SERVICES);
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
 
-if (!token) {
-  throw new Error("Missing GITHUB_TOKEN");
-}
-if (!repo) {
-  throw new Error("Missing GITHUB_REPOSITORY");
-}
+if (!token) throw new Error("Missing GITHUB_TOKEN");
+if (!repo) throw new Error("Missing GITHUB_REPOSITORY");
 
 const priority = {
   operational: 0,
@@ -37,9 +33,30 @@ const priority = {
 function extractSection(body, heading) {
   if (!body) return "";
   const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = new RegExp(`###\\s+${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s|$)`, "i");
+  const re = new RegExp(
+    `###\\s+${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s|$)`,
+    "i"
+  );
   const m = body.match(re);
   return (m?.[1] ?? "").trim();
+}
+
+/**
+ * Normaliza a lista de serviços:
+ * - aceita itens em linhas separadas OU numa mesma linha separados por vírgula
+ * - remove bullets "- " / "* "
+ * - faz trim e elimina vazios
+ */
+function parseServices(servicesRaw) {
+  if (!servicesRaw) return [];
+
+  return servicesRaw
+    .split("\n")
+    .flatMap((line) => line.split(",")) // <-- chave do teu bug
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => s.replace(/^[-*]\s+/, "").trim())
+    .filter(Boolean);
 }
 
 function parseIssueForm(body) {
@@ -48,19 +65,16 @@ function parseIssueForm(body) {
   const description = extractSection(body, "Descrição do incidente");
   const update = extractSection(body, "Atualização (opcional)");
 
-  const services = servicesRaw
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => l.replace(/^[-*]\s+/, ""));
+  const rawServices = parseServices(servicesRaw);
 
-  const mappedServices = services.filter((s) => SUPPORTED_SERVICES_SET.has(s));
+  // mantém só serviços suportados
+  const mappedServices = rawServices.filter((s) => SUPPORTED_SERVICES_SET.has(s));
 
   const severity = ["degraded", "partial", "major", "maintenance"].includes(severityRaw)
     ? severityRaw
     : "degraded";
 
-  const message = [description, update].filter(Boolean).join("\n\n");
+  const message = [description, update].filter(Boolean).join("\n\n").trim();
 
   return { severity, services: mappedServices, message };
 }
@@ -83,7 +97,7 @@ async function githubRequest(url) {
 }
 
 async function listAllIssues() {
-  // Get up to 100 most recent issues (enough for a simple status page)
+  // até 100 issues (ok pra status page)
   const url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=100&sort=created&direction=desc`;
   const issues = await githubRequest(url);
   return issues.filter((i) => !i.pull_request);
@@ -99,10 +113,16 @@ function isIncidentIssue(issue) {
   return /^\[INCIDENTE\]/i.test(title);
 }
 
+function cleanIncidentTitle(title) {
+  return (title || "").replace(/^\[INCIDENTE\]\s*/i, "").trim();
+}
+
 function computeOverallServices(baseServices, openIncidents) {
+  // começa tudo operacional
   const next = {};
   for (const s of Object.keys(baseServices)) next[s] = "operational";
 
+  // aplica severidade do pior incidente por serviço
   for (const inc of openIncidents) {
     const sev = inc.status;
     for (const s of inc.services) {
@@ -120,7 +140,7 @@ function toIncidentRecord(issue) {
 
   return {
     id: issue.number,
-    title: issue.title,
+    title: cleanIncidentTitle(issue.title),
     status: issue.state === "open" ? parsed.severity : "operational",
     state: issue.state,
     services: parsed.services,
@@ -132,10 +152,9 @@ function toIncidentRecord(issue) {
 }
 
 async function main() {
-  let current = { services: {}, incidents: [] };
+  // lê arquivo atual só pra não quebrar se não existir (mas vamos sobrescrever)
   try {
-    const raw = await fs.readFile(STATUS_PATH, "utf8");
-    current = JSON.parse(raw);
+    await fs.readFile(STATUS_PATH, "utf8");
   } catch {
     // ignore
   }
@@ -146,16 +165,20 @@ async function main() {
   }
 
   const issues = await listAllIssues();
+
+  // gera incidentes a partir de issues válidas
   const incidents = issues
     .filter(isTrustedIssue)
     .filter(isIncidentIssue)
     .map(toIncidentRecord)
+    // só mantém incidentes com pelo menos 1 serviço válido e mensagem
     .filter((i) => i.services.length > 0 && i.message.length > 0);
 
   const openIncidents = incidents.filter((i) => i.state === "open");
   const services = computeOverallServices(baseServices, openIncidents);
 
   const next = {
+    last_updated: new Date().toISOString(),
     services,
     incidents: incidents.slice(0, 50),
   };
