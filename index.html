@@ -515,11 +515,11 @@
             </a>
             <span class="inline-flex items-center text-gray-400">•</span>
             <a href="https://under.freshservice.com/support/home"
-   target="_blank"
-   class="text-gray-500 hover:text-gray-600">
-  <span class="sr-only">Contato</span>
-  <span class="text-sm">Contato</span>
-</a>
+               target="_blank"
+               class="text-gray-500 hover:text-gray-600">
+              <span class="sr-only">Contato</span>
+              <span class="text-sm">Contato</span>
+            </a>
           </div>
           <div class="mt-8 md:mt-0 md:order-1">
             <p class="text-center text-sm text-gray-500">
@@ -538,6 +538,10 @@
   </div>
 
   <script>
+    // ✅ Busca SEMPRE o JSON correto (repo status-data)
+    const DATA_ORIGIN = 'https://gabibrutti.github.io/status-data';
+    const STATUS_URL = `${DATA_ORIGIN}/status.json`;
+
     function updateDateTime() {
       const now = new Date();
       const options = {
@@ -572,11 +576,11 @@
       if (!el) return;
 
       const styles = {
-        operational: { wrap: 'bg-green-100 text-green-800', dot: 'bg-green-500' },
-        degraded: { wrap: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500' },
-        partial: { wrap: 'bg-orange-100 text-orange-800', dot: 'bg-orange-500' },
-        major: { wrap: 'bg-red-100 text-red-800', dot: 'bg-red-500' },
-        maintenance: { wrap: 'bg-purple-100 text-purple-800', dot: 'bg-purple-500' }
+        operational: { wrap: 'bg-green-100 text-green-800' },
+        degraded: { wrap: 'bg-yellow-100 text-yellow-800' },
+        partial: { wrap: 'bg-orange-100 text-orange-800' },
+        major: { wrap: 'bg-red-100 text-red-800' },
+        maintenance: { wrap: 'bg-purple-100 text-purple-800' }
       };
 
       const s = styles[status] || styles.operational;
@@ -590,10 +594,8 @@
     }
 
     async function loadStatus() {
-      // Carrega SEM cache e com URL absoluta para evitar confusão de path no GitHub Pages
-      const url = new URL('./status.json', window.location.href);
-      url.searchParams.set('t', Date.now().toString());
-
+      const url = new URL(STATUS_URL);
+      url.searchParams.set('t', Date.now().toString()); // cache buster
       const res = await fetch(url.toString(), { cache: "no-store" });
       if (!res.ok) throw new Error(`Não foi possível carregar status.json (${res.status})`);
       return await res.json();
@@ -673,6 +675,7 @@
         const serviceName = row.getAttribute('data-service-row');
         const status = services[serviceName] || 'operational';
 
+        // barra de progresso (troca cor)
         const progressBar = row.querySelector('.bg-green-500, .bg-yellow-500, .bg-orange-500, .bg-red-500, .bg-purple-500');
         if (progressBar) {
           progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500', 'bg-purple-500');
@@ -686,7 +689,7 @@
           progressBar.classList.add(barColors[status] || 'bg-green-500');
         }
 
-        // limpa qualquer destaque anterior
+        // destaque lateral
         row.classList.remove(
           'bg-yellow-50', 'border-l-4', 'border-yellow-400',
           'bg-orange-50', 'border-orange-400',
@@ -738,14 +741,13 @@
         if (txt) txt.textContent = labelFor(groupStatus);
       }
 
-      // === Incidents Summary (COMPATÍVEL com seu status.json) ===
+      // === Incidents Summary ===
       const summaryTitle = document.getElementById('incidents-summary-title');
       const summaryDescription = document.getElementById('incidents-summary-description');
       const summaryTime = document.getElementById('incidents-summary-time');
       const summaryIcon = document.getElementById('incidents-summary-icon');
       const summaryIconSvg = document.getElementById('incidents-summary-icon-svg');
 
-      // No seu modelo: se está em data.incidents, é incidente ativo (aberto).
       const activeIncidents = incidents;
 
       if (!activeIncidents || activeIncidents.length === 0) {
@@ -779,9 +781,13 @@
         .map((i) => `<p><strong>${i.title}</strong> — ${labelFor(i.status)}</p>`)
         .join('');
 
-      summaryTime.textContent = formatPtBr(
-        activeIncidents[0].last_update || data.last_updated || new Date().toISOString()
-      );
+      const lastTime =
+        activeIncidents[0].updated_at ||
+        activeIncidents[0].timestamp ||
+        data.last_updated ||
+        new Date().toISOString();
+
+      summaryTime.textContent = formatPtBr(lastTime);
     }
 
     async function refresh() {
@@ -793,11 +799,11 @@
         const overallSubtitle = document.getElementById('overall-status-subtitle');
         overallTitle.textContent = 'Erro ao carregar status';
         overallSubtitle.textContent = 'Tente novamente mais tarde';
+        console.error(e);
       }
     }
-    
-    <!-- force deploy -->
-   updateDateTime();
+
+    updateDateTime();
     refresh();
     setInterval(refresh, 60000);
   </script>
