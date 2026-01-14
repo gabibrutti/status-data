@@ -28,16 +28,12 @@ async function run() {
     }
   }
 
-  // Verifica se o script foi rodado por uma Issue ou manualmente
   const issueContext = process.env.ISSUE_CONTEXT;
   if (!issueContext || issueContext === 'null') {
     console.log('Execução manual detectada: Resetando status para Operacional.');
-    
-    // Reset de segurança: se rodar manual, limpamos incidentes e voltamos serviços para operacional
     statusData.incidents = [];
     ALLOWED_SERVICES.forEach(s => statusData.services[s] = "operational");
     statusData.last_updated = new Date().toISOString();
-    
     fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
     return;
   }
@@ -65,13 +61,15 @@ async function run() {
   const rawServices = servicesRaw.split(/[\n,]+/).map(s => s.trim()).filter(s => s !== "");
 
   const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
-  const isClosed = issue.state === 'closed';
+  // Correção: Verifica tanto o estado 'closed' quanto o motivo 'completed'
+  const isClosed = issue.state === 'closed' || issue.state_reason === 'completed';
 
   const incidentIndex = statusData.incidents.findIndex(i => i.id === issue.number);
   
   if (isClosed || issue.state === 'deleted') {
     if (incidentIndex > -1) {
       statusData.incidents.splice(incidentIndex, 1);
+      console.log(`Incidente #${issue.number} removido.`);
     }
   } else {
     const incidentObj = {
@@ -91,7 +89,6 @@ async function run() {
     }
   }
 
-  // Atualiza serviços baseado nos incidentes que sobraram
   ALLOWED_SERVICES.forEach(service => {
     const activeForService = statusData.incidents.find(inc => inc.services.includes(service));
     statusData.services[service] = activeForService ? activeForService.severity : "operational";
