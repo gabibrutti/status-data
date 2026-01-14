@@ -1,122 +1,30 @@
-import fs from 'fs';
+name: Sync Status JSON
+on:
+  issues:
+    types: [opened, edited, closed, deleted, reopened]
+  workflow_dispatch:
 
-const ALLOWED_SERVICES = [
-  "Interconexão entre Data Centers (SP1 e SP2)",
-  "Datacenter SP2",
-  "Datacenter SP1",
-  "ACS (Apache Cloud Stack)",
-  "vCloud",
-  "Central Telefônica",
-  "Freshservice (painel de chamados)",
-  "Under Control (Painel administrativo)",
-  "VPN - Gerência console servidores físico Under"
-];
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-async function run() {
-  const statusPath = './status.json';
-  let statusData = {
-    last_updated: new Date().toISOString(),
-    services: {},
-    incidents: []
-  };
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-  // 1. Carrega o status atual se o arquivo existir
-  if (fs.existsSync(statusPath)) {
-    try {
-      statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
-    } catch (e) {
-      console.log('Erro ao ler status.json, iniciando novo objeto.');
-    }
-  }
+      - name: Sync Incident
+        env:
+          ISSUE_CONTEXT: ${{ toJson(github.event.issue) }}
+        run: node scripts/sync-incident.mjs
 
-  // 2. PROTEÇÃO CONTRA ERRO DE "NULL" (Execução Manual)
-  // Se rodar manualmente, o GitHub não envia dados de uma issue específica.
-  const issueContext = process.env.ISSUE_CONTEXT;
-  if (!issueContext || issueContext === 'null' || issueContext === '') {
-    console.log('Execução manual ou agendada detectada: Limpando incidentes antigos...');
-    
-    // Reset de segurança: remove incidentes "presos" e volta tudo para operacional
-    statusData.incidents = [];
-    ALLOWED_SERVICES.forEach(s => statusData.services[s] = "operational");
-    statusData.last_updated = new Date().toISOString();
-    
-    fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-    console.log('Sucesso: O site foi resetado para o estado Operacional.');
-    return;
-  }
-
-  // 3. Processa os dados da Issue (Execução via gatilho de Issues)
-  const issue = JSON.parse(issueContext);
-  
-  if (!issue || !issue.number) {
-    console.log('Dados da issue inválidos no contexto. Abortando para evitar erro.');
-    return;
-  }
-
-  console.log(`Processando Issue #${issue.number}: ${issue.title}`);
-
-  // Ignora se não tiver a tag de incidente no título
-  if (!issue.title.toUpperCase().includes('[INCIDENTE]')) {
-    console.log('Abortado: Título da issue não contém a tag [INCIDENTE]');
-    return;
-  }
-
-  statusData.last_updated = new Date().toISOString();
-  const body = issue.body || "";
-  
-  const extractSection = (title) => {
-    const regex = new RegExp(`### ${title}\\s*[\\r\\n]+([\\s\\S]*?)(?:\\n###|$)`, 'i');
-    const match = body.match(regex);
-    return match ? match[1].trim() : "";
-  };
-
-  const severityRaw = extractSection('Severidade');
-  const servicesRaw = extractSection('Serviços afetados');
-  const severity = severityRaw.toLowerCase() || 'investigating';
-  const rawServices = servicesRaw.split(/[\n,]+/).map(s => s.trim()).filter(s => s !== "");
-
-  const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
-  const isClosed = issue.state === 'closed';
-
-  const incidentIndex = statusData.incidents.findIndex(i => i.id === issue.number);
-  
-  // Lógica de Sincronização: Se fechar a issue, ela SAI da lista de incidentes ativos
-  if (isClosed || issue.state === 'deleted') {
-    if (incidentIndex > -1) {
-      statusData.incidents.splice(incidentIndex, 1);
-      console.log(`Incidente #${issue.number} removido da lista ativa.`);
-    }
-  } else {
-    // Atualiza ou adiciona novo incidente
-    const incidentObj = {
-      id: issue.number,
-      title: issue.title.replace(/\[INCIDENTE\]/i, '').trim(),
-      status: severity,
-      severity: severity,
-      services: affectedServices,
-      last_update: new Date().toISOString(),
-      url: issue.html_url
-    };
-
-    if (incidentIndex > -1) {
-      statusData.incidents[incidentIndex] = incidentObj;
-    } else {
-      statusData.incidents.unshift(incidentObj);
-    }
-  }
-
-  // 4. Recalcula o status de cada serviço baseado nos incidentes que restaram
-  ALLOWED_SERVICES.forEach(service => {
-    const activeForService = statusData.incidents.find(inc => inc.services.includes(service));
-    statusData.services[service] = activeForService ? activeForService.severity : "operational";
-  });
-
-  // 5. Salva as alterações
-  fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-  console.log('Sucesso: Arquivo status.json sincronizado com o repositório.');
-}
-
-run().catch(err => {
-  console.error('ERRO CRÍTICO NO SCRIPT:', err);
-  process.exit(1);
-});
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add status.json
+          git commit -m "docs: sync status.json [skip ci]" || echo "No changes to commit"
+          git push
