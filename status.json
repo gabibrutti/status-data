@@ -1,30 +1,15 @@
 {
-  "last_updated": "2026-01-14T18:25:12.061Z",
+  "last_updated": "2026-01-14T18:30:51.856Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
-    "ACS (Apache Cloud Stack)": "major",
+    "ACS (Apache Cloud Stack)": "operational",
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "major",
+    "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [
-    {
-      "id": 19,
-      "title": "teste Vcloud",
-      "status": "major",
-      "state": "open",
-      "services": [
-        "Under Control (Painel administrativo)",
-        "ACS (Apache Cloud Stack)"
-      ],
-      "message": "teste de Incidente\n\n_No response_",
-      "timestamp": "2026-01-14T18:07:55Z",
-      "updated_at": "2026-01-14T18:07:55Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/19"
-    }
-  ]
+  "incidents": []
 }
