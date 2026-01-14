@@ -1,143 +1,85 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import fs from 'fs';
 
-const STATUS_PATH = path.resolve("status.json");
+const ALLOWED_SERVICES = [
+  "Interconexão entre Data Centers (SP1 e SP2)",
+  "Datacenter SP2",
+  "Datacenter SP1",
+  "ACS (Apache Cloud Stack)",
+  "vCloud",
+  "Central Telefônica",
+  "Freshservice (painel de chamados)",
+  "Under Control (Painel administrativo)",
+  "VPN - Gerência console servidores físico Under"
+];
 
-const token = process.env.GITHUB_TOKEN;
-const repo = process.env.GITHUB_REPOSITORY;
+async function run() {
+  const issue = JSON.parse(process.env.ISSUE_CONTEXT);
+  const action = process.env.EVENT_ACTION;
 
-if (!token) {
-  throw new Error("Missing GITHUB_TOKEN");
-}
-if (!repo) {
-  throw new Error("Missing GITHUB_REPOSITORY");
-}
+  // 1. Validar se é um Incidente pelo título
+  if (!issue.title.startsWith('[INCIDENTE]')) {
+    console.log('Issue não é um incidente. Ignorando.');
+    return;
+  }
 
-const priority = {
-  operational: 0,
-  degraded: 1,
-  maintenance: 2,
-  partial: 3,
-  major: 4,
-};
+  const statusPath = './status.json';
+  let statusData = { services: {}, incidents: [] };
 
-function extractSection(body, heading) {
-  if (!body) return "";
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = new RegExp(`###\\s+${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s|$)`, "i");
-  const m = body.match(re);
-  return (m?.[1] ?? "").trim();
-}
+  if (fs.existsSync(statusPath)) {
+    statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
+  }
 
-function parseIssueForm(body) {
-  const severityRaw = extractSection(body, "Severidade").split("\n")[0].trim();
-  const servicesRaw = extractSection(body, "Serviços afetados");
-  const description = extractSection(body, "Descrição do incidente");
-  const update = extractSection(body, "Atualização (opcional)");
+  // 2. Parsear o corpo da Issue (Severidade e Serviços)
+  const body = issue.body || "";
+  const severityMatch = body.match(/### Severidade\s*\n\s*(.+)/i);
+  const servicesMatch = body.match(/### Serviços afetados\s*\n\s*(.+)/i);
 
-  const services = servicesRaw
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => l.replace(/^[-*]\s+/, ""));
+  const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'investigating';
+  const rawServices = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
 
-  const severity = ["degraded", "partial", "major", "maintenance"].includes(severityRaw)
-    ? severityRaw
-    : "degraded";
+  // Filtrar apenas serviços permitidos
+  const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
 
-  const message = [description, update].filter(Boolean).join("\n\n");
+  // 3. Atualizar o Status Global dos Serviços
+  // Primeiro, resetamos os serviços afetados para 'operational' se a issue for fechada
+  // Ou definimos a severidade se estiver aberta.
+  
+  const isClosed = issue.state === 'closed';
 
-  return { severity, services, message };
-}
-
-async function githubRequest(url) {
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
+  ALLOWED_SERVICES.forEach(service => {
+    if (affectedServices.includes(service)) {
+      statusData.services[service] = isClosed ? "operational" : severity;
+    } else if (!statusData.services[service]) {
+      statusData.services[service] = "operational";
+    }
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`GitHub API error ${res.status}: ${text}`);
-  }
-
-  return await res.json();
-}
-
-async function listAllIssues() {
-  // Get up to 100 most recent issues (enough for a simple status page)
-  const url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=100&sort=created&direction=desc`;
-  const issues = await githubRequest(url);
-  return issues.filter((i) => !i.pull_request);
-}
-
-function isTrustedIssue(issue) {
-  const assoc = (issue?.author_association || "").toUpperCase();
-  return assoc === "OWNER" || assoc === "MEMBER" || assoc === "COLLABORATOR";
-}
-
-function computeOverallServices(baseServices, openIncidents) {
-  const next = {};
-  for (const s of Object.keys(baseServices)) next[s] = "operational";
-
-  for (const inc of openIncidents) {
-    const sev = inc.status;
-    for (const s of inc.services) {
-      if (!next[s]) next[s] = "operational";
-      if ((priority[sev] ?? 0) > (priority[next[s]] ?? 0)) {
-        next[s] = sev;
-      }
-    }
-  }
-
-  return next;
-}
-
-function toIncidentRecord(issue) {
-  const parsed = parseIssueForm(issue.body || "");
-
-  return {
+  // 4. Gerenciar a lista de incidentes (opcional, para histórico)
+  const incidentIndex = statusData.incidents.findIndex(i => i.id === issue.number);
+  const incidentObj = {
     id: issue.number,
     title: issue.title,
-    status: issue.state === "open" ? parsed.severity : parsed.severity,
-    state: issue.state,
-    services: parsed.services,
-    message: parsed.message,
-    timestamp: issue.created_at,
-    updated_at: issue.updated_at,
-    url: issue.html_url,
+    status: isClosed ? 'resolved' : severity,
+    services: affectedServices,
+    last_update: new Date().toISOString()
   };
-}
 
-async function main() {
-  let current = { services: {}, incidents: [] };
-  try {
-    const raw = await fs.readFile(STATUS_PATH, "utf8");
-    current = JSON.parse(raw);
-  } catch {
-    // ignore
+  if (incidentIndex > -1) {
+    statusData.incidents[incidentIndex] = incidentObj;
+  } else {
+    statusData.incidents.push(incidentObj);
   }
 
-  const baseServices = current.services || {};
+  // Limpar serviços que não estão na lista permitida (segurança)
+  Object.keys(statusData.services).forEach(s => {
+    if (!ALLOWED_SERVICES.includes(s)) delete statusData.services[s];
+  });
 
-  const issues = await listAllIssues();
-  const incidents = issues
-    .filter(isTrustedIssue)
-    .map(toIncidentRecord)
-    .filter((i) => i.services.length > 0 && i.message.length > 0);
-
-  const openIncidents = incidents.filter((i) => i.state === "open");
-  const services = computeOverallServices(baseServices, openIncidents);
-
-  const next = {
-    services,
-    incidents: incidents.slice(0, 50),
-  };
-
-  await fs.writeFile(STATUS_PATH, JSON.stringify(next, null, 2) + "\n", "utf8");
+  fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
+  console.log('status.json atualizado com sucesso.');
 }
 
-await main();
+run().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
