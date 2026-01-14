@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-14T19:41:07.085Z",
+  "last_updated": "2026-01-14T19:44:26.559Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
@@ -37,10 +37,18 @@
           "created_at": "2026-01-14T19:27:39Z",
           "updated_at": "2026-01-14T19:27:39Z",
           "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751233965"
+        },
+        {
+          "id": 3751313275,
+          "author": "gabibrutti",
+          "body": "atualização",
+          "created_at": "2026-01-14T19:44:16Z",
+          "updated_at": "2026-01-14T19:44:16Z",
+          "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751313275"
         }
       ],
       "timestamp": "2026-01-14T18:55:45Z",
-      "updated_at": "2026-01-14T19:27:39Z",
+      "updated_at": "2026-01-14T19:44:16Z",
       "url": "https://github.com/gabibrutti/status-data/issues/21"
     }
   ]
