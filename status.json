@@ -7,9 +7,21 @@
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "operational",
+    "Under Control (Painel administrativo)": "degraded",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [],
-  "last_updated": "2026-01-14T13:00:10.066Z"
+  "incidents": [
+    {
+      "id": 7,
+      "title": "TESTE",
+      "status": "degraded",
+      "severity": "degraded",
+      "services": [
+        "Under Control (Painel administrativo)"
+      ],
+      "last_update": "2026-01-14T13:01:49.506Z",
+      "url": "https://github.com/gabibrutti/status-data/issues/7"
+    }
+  ],
+  "last_updated": "2026-01-14T13:01:49.505Z"
 }
