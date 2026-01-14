@@ -59,7 +59,7 @@ async function run() {
   ALLOWED_SERVICES.forEach(service => {
     if (affectedServices.includes(service)) {
       statusData.services[service] = isClosed ? "operational" : severity;
-    } else if (!statusData.services[service]) {
+    } else {
       statusData.services[service] = "operational";
     }
   });
