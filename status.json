@@ -1,71 +1,15 @@
 {
-  "last_updated": "2026-01-14T20:15:00.376Z",
+  "last_updated": "2026-01-14T20:15:40.982Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
     "ACS (Apache Cloud Stack)": "operational",
-    "vCloud": "partial",
+    "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [
-    {
-      "id": 21,
-      "title": "Dificuldade de conexão",
-      "status": "partial",
-      "state": "open",
-      "services": [
-        "vCloud"
-      ],
-      "message": "Estamos recebendo relatos...\n\n_No response_",
-      "updates": [
-        {
-          "id": 3751180537,
-          "author": "cristhianczapliski-commits",
-          "body": "Temos uma nova atualização.",
-          "created_at": "2026-01-14T19:14:38Z",
-          "updated_at": "2026-01-14T19:14:38Z",
-          "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751180537"
-        },
-        {
-          "id": 3751233965,
-          "author": "gabibrutti",
-          "body": "teste de atualização",
-          "created_at": "2026-01-14T19:27:39Z",
-          "updated_at": "2026-01-14T19:27:39Z",
-          "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751233965"
-        },
-        {
-          "id": 3751313275,
-          "author": "gabibrutti",
-          "body": "atualização",
-          "created_at": "2026-01-14T19:44:16Z",
-          "updated_at": "2026-01-14T19:44:16Z",
-          "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751313275"
-        },
-        {
-          "id": 3751373566,
-          "author": "gabibrutti",
-          "body": "teste novamente",
-          "created_at": "2026-01-14T19:51:35Z",
-          "updated_at": "2026-01-14T19:51:35Z",
-          "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751373566"
-        },
-        {
-          "id": 3751538057,
-          "author": "gabibrutti",
-          "body": "teste novo agora vai",
-          "created_at": "2026-01-14T20:14:47Z",
-          "updated_at": "2026-01-14T20:14:47Z",
-          "url": "https://github.com/gabibrutti/status-data/issues/21#issuecomment-3751538057"
-        }
-      ],
-      "timestamp": "2026-01-14T18:55:45Z",
-      "updated_at": "2026-01-14T20:14:47Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/21"
-    }
-  ]
+  "incidents": []
 }
