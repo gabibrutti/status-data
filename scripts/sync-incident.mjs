@@ -14,11 +14,10 @@ const ALLOWED_SERVICES = [
 
 async function run() {
   const issue = JSON.parse(process.env.ISSUE_CONTEXT);
-  const action = process.env.EVENT_ACTION;
 
-  // 1. Validar se é um Incidente pelo título
+  // 1. Filtro por Título
   if (!issue.title.startsWith('[INCIDENTE]')) {
-    console.log('Issue não é um incidente. Ignorando.');
+    console.log('Ignorado: Não é um incidente.');
     return;
   }
 
@@ -29,7 +28,7 @@ async function run() {
     statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
   }
 
-  // 2. Parsear o corpo da Issue (Severidade e Serviços)
+  // 2. Parsing do Corpo (Severidade e Serviços Afetados)
   const body = issue.body || "";
   const severityMatch = body.match(/### Severidade\s*\n\s*(.+)/i);
   const servicesMatch = body.match(/### Serviços afetados\s*\n\s*(.+)/i);
@@ -37,15 +36,11 @@ async function run() {
   const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'investigating';
   const rawServices = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
 
-  // Filtrar apenas serviços permitidos
+  // Filtrar apenas serviços da sua lista oficial
   const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
-
-  // 3. Atualizar o Status Global dos Serviços
-  // Primeiro, resetamos os serviços afetados para 'operational' se a issue for fechada
-  // Ou definimos a severidade se estiver aberta.
-  
   const isClosed = issue.state === 'closed';
 
+  // 3. Atualizar Status dos Serviços no JSON
   ALLOWED_SERVICES.forEach(service => {
     if (affectedServices.includes(service)) {
       statusData.services[service] = isClosed ? "operational" : severity;
@@ -54,27 +49,7 @@ async function run() {
     }
   });
 
-  // 4. Gerenciar a lista de incidentes (opcional, para histórico)
-  const incidentIndex = statusData.incidents.findIndex(i => i.id === issue.number);
-  const incidentObj = {
-    id: issue.number,
-    title: issue.title,
-    status: isClosed ? 'resolved' : severity,
-    services: affectedServices,
-    last_update: new Date().toISOString()
-  };
-
-  if (incidentIndex > -1) {
-    statusData.incidents[incidentIndex] = incidentObj;
-  } else {
-    statusData.incidents.push(incidentObj);
-  }
-
-  // Limpar serviços que não estão na lista permitida (segurança)
-  Object.keys(statusData.services).forEach(s => {
-    if (!ALLOWED_SERVICES.includes(s)) delete statusData.services[s];
-  });
-
+  // 4. Gravação do Arquivo (A antiga linha 75 do erro)
   fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
   console.log('status.json atualizado com sucesso.');
 }
