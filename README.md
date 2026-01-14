@@ -15,3 +15,4 @@ Repositório de dados da página de status.
 - `partial`
 - `major`
 - `maintenance`
+
