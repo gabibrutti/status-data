@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-14T17:29:21.299Z",
+  "last_updated": "2026-01-14T18:03:48.072Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
@@ -8,22 +8,8 @@
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "partial",
+    "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [
-    {
-      "id": 18,
-      "title": "teste de abertura",
-      "status": "partial",
-      "state": "open",
-      "services": [
-        "Under Control (Painel administrativo)"
-      ],
-      "message": "teste de abertura\n\n_No response_",
-      "timestamp": "2026-01-14T17:29:11Z",
-      "updated_at": "2026-01-14T17:29:11Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/18"
-    }
-  ]
+  "incidents": []
 }
