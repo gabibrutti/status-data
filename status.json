@@ -10,29 +10,6 @@
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [
-    {
-      "id": 11,
-      "title": "Teste de Validação Final do Sistema",
-      "status": "resolved",
-      "severity": "degraded",
-      "services": [
-        "vCloud"
-      ],
-      "last_update": "2026-01-14T11:53:29.539Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/11"
-    },
-    {
-      "id": 8,
-      "title": "Teste de Vinculação de Serviço",
-      "status": "resolved",
-      "severity": "degraded",
-      "services": [
-        "Datacenter SP1"
-      ],
-      "last_update": "2026-01-14T04:47:36.935Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/8"
-    }
-  ],
-  "last_updated": "2026-01-14T11:53:29.538Z"
+  "incidents": [],
+  "last_updated": "2026-01-14T12:15:00.000Z"
 }
