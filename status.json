@@ -4,13 +4,24 @@
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
     "ACS (Apache Cloud Stack)": "operational",
-    "vCloud": "operational",
+    "vCloud": "degraded",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": [
+    {
+      "id": 11,
+      "title": "Teste de Validação Final do Sistema",
+      "status": "degraded",
+      "severity": "degraded",
+      "services": [
+        "vCloud"
+      ],
+      "last_update": "2026-01-14T11:47:19.757Z",
+      "url": "https://github.com/gabibrutti/status-data/issues/11"
+    },
     {
       "id": 8,
       "title": "Teste de Vinculação de Serviço",
@@ -23,5 +34,5 @@
       "url": "https://github.com/gabibrutti/status-data/issues/8"
     }
   ],
-  "last_updated": "2026-01-14T05:06:57.377Z"
+  "last_updated": "2026-01-14T11:47:19.757Z"
 }
