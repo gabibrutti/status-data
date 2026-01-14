@@ -2,7 +2,7 @@
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
-    "Datacenter SP1": "operational",
+    "Datacenter SP1": "degraded",
     "ACS (Apache Cloud Stack)": "operational",
     "vCloud": "degraded",
     "Central Telefônica": "operational",
@@ -11,6 +11,17 @@
     "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": [
+    {
+      "id": 8,
+      "title": "Teste de Vinculação de Serviço",
+      "status": "degraded",
+      "severity": "degraded",
+      "services": [
+        "Datacenter SP1"
+      ],
+      "last_update": "2026-01-14T13:03:19.392Z",
+      "url": "https://github.com/gabibrutti/status-data/issues/8"
+    },
     {
       "id": 11,
       "title": "Teste de Validação Final do Sistema",
@@ -34,5 +45,5 @@
       "url": "https://github.com/gabibrutti/status-data/issues/7"
     }
   ],
-  "last_updated": "2026-01-14T13:03:10.188Z"
+  "last_updated": "2026-01-14T13:03:19.391Z"
 }
