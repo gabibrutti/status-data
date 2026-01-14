@@ -51,11 +51,10 @@ function parseServices(servicesRaw) {
   if (!servicesRaw) return [];
 
   return servicesRaw
-    .split("\n")
-    .flatMap((line) => line.split(",")) // <-- chave do teu bug
+    .split(/[\n,]+/g)                 // aceita quebra de linha OU vírgula
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((s) => s.replace(/^[-*]\s+/, "").trim())
+    .map((s) => s.replace(/^[-*]\s+/, "").trim()) // remove "- " ou "* "
     .filter(Boolean);
 }
 
