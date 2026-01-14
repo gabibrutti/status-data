@@ -1,8 +1,8 @@
 name: Sync Status JSON
-
 on:
+  workflow_dispatch:  # Adicione esta linha aqui
   issues:
-    types: [opened, edited, deleted, closed, reopened]
+    types: [opened, edited, deleted, closed, reopened, labeled, unlabeled]
 
 jobs:
   update-json:
