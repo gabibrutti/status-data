@@ -1,6 +1,23 @@
 name: Sync status.json from issues
 
 on:
+  on:
+  workflow_dispatch:
+
+  issues:
+    types: [opened, edited, reopened, closed]
+
+  issue_comment:
+    types: [created, edited, deleted]
+
+  push:
+    branches: [ "main" ]
+    paths:
+      - ".github/workflows/sync-status-json.yml"
+      - "scripts/sync-incident.mjs"
+      - "status.json"
+      - "index.html"
+
   workflow_dispatch:
 
   issues:
