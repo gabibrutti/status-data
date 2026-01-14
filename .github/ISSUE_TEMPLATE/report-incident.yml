@@ -6,7 +6,6 @@ body:
     attributes:
       value: |
         Preencha os campos abaixo.
-
         - Para **finalizar** um incidente, basta **fechar** esta issue.
         - Para **corrigir informações**, edite a issue.
 
