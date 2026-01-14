@@ -1,7 +1,6 @@
 name: Sync status.json from issues
 
 on:
-  on:
   workflow_dispatch:
 
   issues:
@@ -11,20 +10,7 @@ on:
     types: [created, edited, deleted]
 
   push:
-    branches: [ "main" ]
-    paths:
-      - ".github/workflows/sync-status-json.yml"
-      - "scripts/sync-incident.mjs"
-      - "status.json"
-      - "index.html"
-
-  workflow_dispatch:
-
-  issues:
-    types: [opened, edited, reopened, closed]
-
-  push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - ".github/workflows/sync-status-json.yml"
       - "scripts/sync-incident.mjs"
@@ -61,10 +47,8 @@ jobs:
             echo "No changes"
             exit 0
           fi
-
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add status.json
-          git commit -m "sync: update status.json"
+          git commit -m "Update status.json"
           git push
