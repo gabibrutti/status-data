@@ -17,10 +17,13 @@ const SUPPORTED_SERVICES = [
 const SUPPORTED_SERVICES_SET = new Set(SUPPORTED_SERVICES);
 
 const token = process.env.GITHUB_TOKEN;
-const repo = process.env.GITHUB_REPOSITORY;
+const repoFull = process.env.GITHUB_REPOSITORY;
 
 if (!token) throw new Error("Missing GITHUB_TOKEN");
-if (!repo) throw new Error("Missing GITHUB_REPOSITORY");
+if (!repoFull) throw new Error("Missing GITHUB_REPOSITORY");
+
+const [owner, repo] = repoFull.split("/");
+if (!owner || !repo) throw new Error(`Invalid GITHUB_REPOSITORY: ${repoFull}`);
 
 const priority = {
   operational: 0,
@@ -51,10 +54,10 @@ function parseServices(servicesRaw) {
   if (!servicesRaw) return [];
 
   return servicesRaw
-    .split(/[\n,]+/g)                 // aceita quebra de linha OU vírgula
+    .split(/[\n,]+/g)
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((s) => s.replace(/^[-*]\s+/, "").trim()) // remove "- " ou "* "
+    .map((s) => s.replace(/^[-*]\s+/, "").trim())
     .filter(Boolean);
 }
 
@@ -73,6 +76,7 @@ function parseIssueForm(body) {
     ? severityRaw
     : "degraded";
 
+  // mensagem pode ser vazia (a UI decide se mostra ou não)
   const message = [description, update].filter(Boolean).join("\n\n").trim();
 
   return { severity, services: mappedServices, message };
@@ -84,6 +88,7 @@ async function githubRequest(url) {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "status-data-bot",
     },
   });
 
@@ -97,7 +102,7 @@ async function githubRequest(url) {
 
 async function listAllIssues() {
   // até 100 issues (ok pra status page)
-  const url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=100&sort=created&direction=desc`;
+  const url = `https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100&sort=created&direction=desc`;
   const issues = await githubRequest(url);
   return issues.filter((i) => !i.pull_request);
 }
@@ -114,6 +119,47 @@ function isIncidentIssue(issue) {
 
 function cleanIncidentTitle(title) {
   return (title || "").replace(/^\[INCIDENTE\]\s*/i, "").trim();
+}
+
+/**
+ * Busca comentários da issue (updates) e normaliza
+ * - retorna lista com { id, author, body, created_at, updated_at, url }
+ */
+async function fetchAllIssueComments(issueNumber) {
+  const perPage = 100;
+  let page = 1;
+  const all = [];
+
+  while (true) {
+    const url = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments?per_page=${perPage}&page=${page}`;
+    const data = await githubRequest(url);
+
+    all.push(...data);
+
+    if (!Array.isArray(data) || data.length < perPage) break;
+    page += 1;
+
+    // proteção simples pra não ficar absurdo em issues gigantes
+    if (page > 10) break; // 1000 comentários no máx.
+  }
+
+  // Normaliza e filtra vazios
+  const normalized = all
+    .map((c) => ({
+      id: c.id,
+      author: c.user?.login || "unknown",
+      body: (c.body || "").trim(),
+      created_at: c.created_at,
+      updated_at: c.updated_at,
+      url: c.html_url,
+      // se quiser filtrar bots depois:
+      // is_bot: !!c.user?.type && c.user.type.toLowerCase() === "bot"
+    }))
+    .filter((c) => c.body.length > 0);
+
+  // opcional: limita a quantidade salva no status.json (evita crescer demais)
+  const MAX_UPDATES = 30;
+  return normalized.slice(-MAX_UPDATES);
 }
 
 function computeOverallServices(baseServices, openIncidents) {
@@ -134,8 +180,11 @@ function computeOverallServices(baseServices, openIncidents) {
   return next;
 }
 
-function toIncidentRecord(issue) {
+async function toIncidentRecord(issue) {
   const parsed = parseIssueForm(issue.body || "");
+
+  // Busca comentários como updates
+  const updates = await fetchAllIssueComments(issue.number);
 
   return {
     id: issue.number,
@@ -143,7 +192,8 @@ function toIncidentRecord(issue) {
     status: issue.state === "open" ? parsed.severity : "operational",
     state: issue.state,
     services: parsed.services,
-    message: parsed.message,
+    message: parsed.message, // pode ser vazio
+    updates,                 // ✅ NOVO: comentários
     timestamp: issue.created_at,
     updated_at: issue.updated_at,
     url: issue.html_url,
@@ -165,13 +215,15 @@ async function main() {
 
   const issues = await listAllIssues();
 
-  // gera incidentes a partir de issues válidas
-  const incidents = issues
+  // filtra issues válidas
+  const incidentIssues = issues
     .filter(isTrustedIssue)
-    .filter(isIncidentIssue)
-    .map(toIncidentRecord)
-    // só mantém incidentes com pelo menos 1 serviço válido e mensagem
-    .filter((i) => i.services.length > 0 && i.message.length > 0);
+    .filter(isIncidentIssue);
+
+  // monta incidentes com comments
+  const incidents = (await Promise.all(incidentIssues.map(toIncidentRecord)))
+    // mantém incidentes com pelo menos 1 serviço válido
+    .filter((i) => i.services.length > 0);
 
   const openIncidents = incidents.filter((i) => i.state === "open");
   const services = computeOverallServices(baseServices, openIncidents);
