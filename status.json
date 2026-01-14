@@ -7,7 +7,7 @@
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "operational",
+    "Under Control (Painel administrativo)": "degraded",
     "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": []
