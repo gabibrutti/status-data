@@ -2,45 +2,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Status - Under</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="icon" type="image/png" href="https://under.com.br/favicon.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="https://under.com.br/favicon.ico" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'under-blue': '#0056b3',
-            'under-dark': '#1a202c',
-            'under-gray': '#4a5568',
-            'under-light': '#f7fafc',
-            'success': '#10b981',
-            'warning': '#f59e0b',
-            'danger': '#ef4444',
-            'info': '#3b82f6',
-            'maintenance': '#8b5cf6'
+            "under-blue": "#0056b3",
+            "under-dark": "#1a202c",
+            "under-gray": "#4a5568",
+            "under-light": "#f7fafc",
+            success: "#10b981",
+            warning: "#f59e0b",
+            danger: "#ef4444",
+            info: "#3b82f6",
+            maintenance: "#8b5cf6",
           },
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
+            sans: ["Inter", "sans-serif"],
           },
-        }
-      }
-    }
+        },
+      },
+    };
   </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: "Inter", sans-serif;
       background-color: #f8f9fc;
-      background-image:
-        linear-gradient(45deg, rgba(9, 30, 66, 0.02) 25%, transparent 25%),
+      background-image: linear-gradient(45deg, rgba(9, 30, 66, 0.02) 25%, transparent 25%),
         linear-gradient(-45deg, rgba(9, 30, 66, 0.02) 25%, transparent 25%),
         linear-gradient(45deg, transparent 75%, rgba(9, 30, 66, 0.02) 75%),
         linear-gradient(-45deg, transparent 75%, rgba(9, 30, 66, 0.02) 75%);
@@ -81,12 +80,12 @@
       margin-right: 6px;
     }
 
-    .status-operational { background-color: #10B981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
-    .status-degraded    { background-color: #F59E0B; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
-    .status-partial     { background-color: #F97316; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); }
-    .status-major       { background-color: #EF4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
-    .status-outage      { background-color: #EF4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
-    .status-maintenance { background-color: #8B5CF6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+    .status-operational { background-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+    .status-degraded    { background-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+    .status-partial     { background-color: #f97316; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); }
+    .status-major       { background-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+    .status-outage      { background-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+    .status-maintenance { background-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
 
     @media (max-width: 640px) {
       .service-grid { grid-template-columns: 1fr; }
@@ -101,8 +100,8 @@
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <a href="https://under.com.br" target="_blank" class="flex-shrink-0">
-              <img src="logo.png" alt="Under Logo" class="h-8">
+            <a href="https://under.com.br" target="_blank" rel="noopener noreferrer" class="flex-shrink-0">
+              <img src="logo.png" alt="Under Logo" class="h-8" />
             </a>
             <div class="h-6 w-px bg-gray-200"></div>
             <h1 class="text-lg font-semibold text-gray-900">Status Page</h1>
@@ -155,7 +154,7 @@
                       </svg>
                     </div>
                   </div>
-                  <div class="ml-4">
+                  <div class="ml-4 w-full">
                     <h3 class="text-base font-medium text-gray-900" id="incidents-summary-title">Carregando...</h3>
                     <div class="mt-1 text-sm text-gray-500" id="incidents-summary-description"></div>
                     <div class="mt-2 flex items-center text-xs text-gray-500">
@@ -204,7 +203,6 @@
               <div class="text-xs text-gray-500">Serviços</div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -217,7 +215,12 @@
         </div>
         <div class="flex items-center space-x-3">
           <div class="relative">
-            <input type="text" placeholder="Buscar serviços..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            <input
+              id="service-search"
+              type="text"
+              placeholder="Buscar serviços..."
+              class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -514,9 +517,7 @@
               <span class="text-sm">Privacidade</span>
             </a>
             <span class="inline-flex items-center text-gray-400">•</span>
-            <a href="https://under.freshservice.com/support/home"
-               target="_blank"
-               class="text-gray-500 hover:text-gray-600">
+            <a href="https://under.freshservice.com/support/home" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-gray-600">
               <span class="sr-only">Contato</span>
               <span class="text-sm">Contato</span>
             </a>
@@ -528,8 +529,8 @@
           </div>
         </div>
         <div class="mt-8 flex justify-center">
-          <a href="https://under.com.br" target="_blank" class="inline-flex items-center">
-            <img src="logo.png" alt="Under Logo" class="h-6">
+          <a href="https://under.com.br" target="_blank" rel="noopener noreferrer" class="inline-flex items-center">
+            <img src="logo.png" alt="Under Logo" class="h-6" />
             <span class="ml-2 text-sm text-gray-500">Powered by Under</span>
           </a>
         </div>
@@ -539,20 +540,29 @@
 
   <script>
     // ✅ Busca SEMPRE o JSON correto (repo status-data)
-    const DATA_ORIGIN = 'https://gabibrutti.github.io/status-data';
+    const DATA_ORIGIN = "https://gabibrutti.github.io/status-data";
     const STATUS_URL = `${DATA_ORIGIN}/status.json`;
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
     function updateDateTime() {
       const now = new Date();
       const options = {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       };
-      document.getElementById('current-time').textContent = now.toLocaleString('pt-BR', options);
+      document.getElementById("current-time").textContent = now.toLocaleString("pt-BR", options);
       setTimeout(updateDateTime, 60000);
     }
 
@@ -563,11 +573,11 @@
 
     function labelFor(status) {
       const map = {
-        operational: 'Operacional',
-        degraded: 'Degradado',
-        partial: 'Parcial',
-        major: 'Indisponível',
-        maintenance: 'Manutenção'
+        operational: "Operacional",
+        degraded: "Degradado",
+        partial: "Parcial",
+        major: "Indisponível",
+        maintenance: "Manutenção",
       };
       return map[status] || status;
     }
@@ -576,11 +586,11 @@
       if (!el) return;
 
       const styles = {
-        operational: { wrap: 'bg-green-100 text-green-800' },
-        degraded: { wrap: 'bg-yellow-100 text-yellow-800' },
-        partial: { wrap: 'bg-orange-100 text-orange-800' },
-        major: { wrap: 'bg-red-100 text-red-800' },
-        maintenance: { wrap: 'bg-purple-100 text-purple-800' }
+        operational: { wrap: "bg-green-100 text-green-800" },
+        degraded: { wrap: "bg-yellow-100 text-yellow-800" },
+        partial: { wrap: "bg-orange-100 text-orange-800" },
+        major: { wrap: "bg-red-100 text-red-800" },
+        maintenance: { wrap: "bg-purple-100 text-purple-800" },
       };
 
       const s = styles[status] || styles.operational;
@@ -589,13 +599,13 @@
 
     function formatPtBr(dateString) {
       const d = new Date(dateString);
-      const opts = { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-      return d.toLocaleString('pt-BR', opts);
+      const opts = { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" };
+      return d.toLocaleString("pt-BR", opts);
     }
 
     async function loadStatus() {
       const url = new URL(STATUS_URL);
-      url.searchParams.set('t', Date.now().toString()); // cache buster
+      url.searchParams.set("t", Date.now().toString()); // cache buster
       const res = await fetch(url.toString(), { cache: "no-store" });
       if (!res.ok) throw new Error(`Não foi possível carregar status.json (${res.status})`);
       return await res.json();
@@ -606,40 +616,40 @@
       const incidents = Array.isArray(data?.incidents) ? data.incidents : [];
 
       // === Overall ===
-      let overall = 'operational';
+      let overall = "operational";
       for (const st of Object.values(services)) {
         if (severityRank(st) > severityRank(overall)) overall = st;
       }
 
-      const overallTitle = document.getElementById('overall-status-title');
-      const overallSubtitle = document.getElementById('overall-status-subtitle');
-      const iconWrap = document.getElementById('overall-status-icon');
-      const iconSvg = document.getElementById('overall-status-icon-svg');
+      const overallTitle = document.getElementById("overall-status-title");
+      const overallSubtitle = document.getElementById("overall-status-subtitle");
+      const iconWrap = document.getElementById("overall-status-icon");
+      const iconSvg = document.getElementById("overall-status-icon-svg");
 
-      if (overall === 'operational') {
-        iconWrap.className = 'p-3 rounded-full bg-green-100';
-        iconSvg.className = 'h-6 w-6 text-green-600';
-        overallTitle.textContent = 'Todos os sistemas operando normalmente';
-        overallSubtitle.textContent = incidents.length ? 'Incidentes listados abaixo' : 'Nenhum incidente em andamento';
+      if (overall === "operational") {
+        iconWrap.className = "p-3 rounded-full bg-green-100";
+        iconSvg.className = "h-6 w-6 text-green-600";
+        overallTitle.textContent = "Todos os sistemas operando normalmente";
+        overallSubtitle.textContent = incidents.length ? "Incidentes listados abaixo" : "Nenhum incidente em andamento";
       } else {
         const colors = {
-          degraded: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-          partial: { bg: 'bg-orange-100', text: 'text-orange-700' },
-          major: { bg: 'bg-red-100', text: 'text-red-700' },
-          maintenance: { bg: 'bg-purple-100', text: 'text-purple-700' },
+          degraded: { bg: "bg-yellow-100", text: "text-yellow-700" },
+          partial: { bg: "bg-orange-100", text: "text-orange-700" },
+          major: { bg: "bg-red-100", text: "text-red-700" },
+          maintenance: { bg: "bg-purple-100", text: "text-purple-700" },
         };
         const c = colors[overall] || colors.degraded;
         iconWrap.className = `p-3 rounded-full ${c.bg}`;
         iconSvg.className = `h-6 w-6 ${c.text}`;
         overallTitle.textContent = `Atenção: ${labelFor(overall)}`;
-        overallSubtitle.textContent = incidents.length ? 'Há incidentes em andamento' : 'Há serviços com alerta';
+        overallSubtitle.textContent = incidents.length ? "Há incidentes em andamento" : "Há serviços com alerta";
       }
 
       // === Counters ===
-      const statOperational = document.getElementById('stat-operational');
-      const statDegraded = document.getElementById('stat-degraded');
-      const statMajor = document.getElementById('stat-major');
-      const statMaintenance = document.getElementById('stat-maintenance');
+      const statOperational = document.getElementById("stat-operational");
+      const statDegraded = document.getElementById("stat-degraded");
+      const statMajor = document.getElementById("stat-major");
+      const statMaintenance = document.getElementById("stat-maintenance");
 
       const counts = { operational: 0, degraded: 0, partial: 0, major: 0, maintenance: 0 };
       for (const st of Object.values(services)) {
@@ -653,72 +663,72 @@
       statMaintenance.textContent = String(counts.maintenance);
 
       // === Service status labels ===
-      const serviceEls = document.querySelectorAll('[data-service-status]');
+      const serviceEls = document.querySelectorAll("[data-service-status]");
       for (const el of serviceEls) {
-        const key = el.getAttribute('data-service-status');
-        const status = services[key] || 'operational';
+        const key = el.getAttribute("data-service-status");
+        const status = services[key] || "operational";
         el.textContent = labelFor(status);
 
         const statusColors = {
-          operational: 'text-green-600',
-          degraded: 'text-yellow-600',
-          partial: 'text-orange-600',
-          major: 'text-red-600',
-          maintenance: 'text-purple-600'
+          operational: "text-green-600",
+          degraded: "text-yellow-600",
+          partial: "text-orange-600",
+          major: "text-red-600",
+          maintenance: "text-purple-600",
         };
-        el.className = `font-medium ${statusColors[status] || 'text-green-600'}`;
+        el.className = `font-medium ${statusColors[status] || "text-green-600"}`;
       }
 
       // === Row visuals (progress + highlight) ===
-      const serviceRows = document.querySelectorAll('[data-service-row]');
+      const serviceRows = document.querySelectorAll("[data-service-row]");
       for (const row of serviceRows) {
-        const serviceName = row.getAttribute('data-service-row');
-        const status = services[serviceName] || 'operational';
+        const serviceName = row.getAttribute("data-service-row");
+        const status = services[serviceName] || "operational";
 
         // barra de progresso (troca cor)
-        const progressBar = row.querySelector('.bg-green-500, .bg-yellow-500, .bg-orange-500, .bg-red-500, .bg-purple-500');
+        const progressBar = row.querySelector(".bg-green-500, .bg-yellow-500, .bg-orange-500, .bg-red-500, .bg-purple-500");
         if (progressBar) {
-          progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500', 'bg-purple-500');
+          progressBar.classList.remove("bg-green-500", "bg-yellow-500", "bg-orange-500", "bg-red-500", "bg-purple-500");
           const barColors = {
-            operational: 'bg-green-500',
-            degraded: 'bg-yellow-500',
-            partial: 'bg-orange-500',
-            major: 'bg-red-500',
-            maintenance: 'bg-purple-500'
+            operational: "bg-green-500",
+            degraded: "bg-yellow-500",
+            partial: "bg-orange-500",
+            major: "bg-red-500",
+            maintenance: "bg-purple-500",
           };
-          progressBar.classList.add(barColors[status] || 'bg-green-500');
+          progressBar.classList.add(barColors[status] || "bg-green-500");
         }
 
         // destaque lateral
         row.classList.remove(
-          'bg-yellow-50', 'border-l-4', 'border-yellow-400',
-          'bg-orange-50', 'border-orange-400',
-          'bg-red-50', 'border-red-400',
-          'bg-purple-50', 'border-purple-400'
+          "bg-yellow-50", "border-l-4", "border-yellow-400",
+          "bg-orange-50", "border-orange-400",
+          "bg-red-50", "border-red-400",
+          "bg-purple-50", "border-purple-400"
         );
 
-        if (status !== 'operational') {
-          if (status === 'degraded') row.classList.add('bg-yellow-50', 'border-l-4', 'border-yellow-400');
-          else if (status === 'partial') row.classList.add('bg-orange-50', 'border-l-4', 'border-orange-400');
-          else if (status === 'major') row.classList.add('bg-red-50', 'border-l-4', 'border-red-400');
-          else if (status === 'maintenance') row.classList.add('bg-purple-50', 'border-l-4', 'border-purple-400');
+        if (status !== "operational") {
+          if (status === "degraded") row.classList.add("bg-yellow-50", "border-l-4", "border-yellow-400");
+          else if (status === "partial") row.classList.add("bg-orange-50", "border-l-4", "border-orange-400");
+          else if (status === "major") row.classList.add("bg-red-50", "border-l-4", "border-red-400");
+          else if (status === "maintenance") row.classList.add("bg-purple-50", "border-l-4", "border-purple-400");
         }
       }
 
       // === Group badges ===
       const groups = {};
-      const groupServiceEls = document.querySelectorAll('[data-group-service]');
+      const groupServiceEls = document.querySelectorAll("[data-group-service]");
       for (const el of groupServiceEls) {
-        const group = el.getAttribute('data-group-service');
-        const service = el.getAttribute('data-service-row');
+        const group = el.getAttribute("data-group-service");
+        const service = el.getAttribute("data-service-row");
         groups[group] = groups[group] || [];
         groups[group].push(service);
       }
 
       for (const [groupName, groupServices] of Object.entries(groups)) {
-        let groupStatus = 'operational';
+        let groupStatus = "operational";
         for (const s of groupServices) {
-          const st = services[s] || 'operational';
+          const st = services[s] || "operational";
           if (severityRank(st) > severityRank(groupStatus)) groupStatus = st;
         }
 
@@ -729,46 +739,47 @@
         styleBadge(badge, groupStatus);
 
         if (dot) {
-          const dotClass = {
-            operational: 'bg-green-500',
-            degraded: 'bg-yellow-500',
-            partial: 'bg-orange-500',
-            major: 'bg-red-500',
-            maintenance: 'bg-purple-500'
-          }[groupStatus] || 'bg-green-500';
+          const dotClass =
+            {
+              operational: "bg-green-500",
+              degraded: "bg-yellow-500",
+              partial: "bg-orange-500",
+              major: "bg-red-500",
+              maintenance: "bg-purple-500",
+            }[groupStatus] || "bg-green-500";
           dot.className = `w-2 h-2 rounded-full ${dotClass} mr-1.5`;
         }
         if (txt) txt.textContent = labelFor(groupStatus);
       }
 
-      // === Incidents Summary ===
-      const summaryTitle = document.getElementById('incidents-summary-title');
-      const summaryDescription = document.getElementById('incidents-summary-description');
-      const summaryTime = document.getElementById('incidents-summary-time');
-      const summaryIcon = document.getElementById('incidents-summary-icon');
-      const summaryIconSvg = document.getElementById('incidents-summary-icon-svg');
+      // === Incidents Summary + Updates (comentários) ===
+      const summaryTitle = document.getElementById("incidents-summary-title");
+      const summaryDescription = document.getElementById("incidents-summary-description");
+      const summaryTime = document.getElementById("incidents-summary-time");
+      const summaryIcon = document.getElementById("incidents-summary-icon");
+      const summaryIconSvg = document.getElementById("incidents-summary-icon-svg");
 
       const activeIncidents = incidents;
 
       if (!activeIncidents || activeIncidents.length === 0) {
-        summaryTitle.textContent = 'Todos os sistemas operando normalmente';
-        summaryDescription.innerHTML = '<p>Nenhum incidente em andamento.</p>';
+        summaryTitle.textContent = "Todos os sistemas operando normalmente";
+        summaryDescription.innerHTML = "<p>Nenhum incidente em andamento.</p>";
         summaryTime.textContent = formatPtBr(data.last_updated || new Date().toISOString());
-        summaryIcon.className = 'h-8 w-8 rounded-full bg-green-100 flex items-center justify-center';
-        summaryIconSvg.className = 'h-5 w-5 text-green-500';
+        summaryIcon.className = "h-8 w-8 rounded-full bg-green-100 flex items-center justify-center";
+        summaryIconSvg.className = "h-5 w-5 text-green-500";
         return;
       }
 
-      let openSeverity = 'degraded';
+      let openSeverity = "degraded";
       for (const inc of activeIncidents) {
         if (severityRank(inc.status) > severityRank(openSeverity)) openSeverity = inc.status;
       }
 
       const iconColors = {
-        degraded: { wrap: 'bg-yellow-100', svg: 'text-yellow-500' },
-        partial: { wrap: 'bg-orange-100', svg: 'text-orange-500' },
-        major: { wrap: 'bg-red-100', svg: 'text-red-500' },
-        maintenance: { wrap: 'bg-purple-100', svg: 'text-purple-500' }
+        degraded: { wrap: "bg-yellow-100", svg: "text-yellow-500" },
+        partial: { wrap: "bg-orange-100", svg: "text-orange-500" },
+        major: { wrap: "bg-red-100", svg: "text-red-500" },
+        maintenance: { wrap: "bg-purple-100", svg: "text-purple-500" },
       };
       const ic = iconColors[openSeverity] || iconColors.degraded;
 
@@ -776,56 +787,91 @@
       summaryIconSvg.className = `h-5 w-5 ${ic.svg}`;
 
       summaryTitle.textContent = `${activeIncidents.length} incidente(s) em andamento`;
+
       summaryDescription.innerHTML = activeIncidents
-  .slice(0, 3)
-  .map((i) => {
-    const cleanMessage =
-      i.message &&
-      !i.message.toLowerCase().includes('no response') &&
-      i.message.trim() !== ''
-        ? i.message
-        : null;
+        .slice(0, 3)
+        .map((i) => {
+          const rawMsg = (i.message || "").trim();
+          const msgIsEmpty =
+            !rawMsg ||
+            rawMsg.toLowerCase().includes("no response") ||
+            rawMsg.toLowerCase().includes("_no response_");
 
-    return `
-      <div class="mt-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
-        <p class="font-semibold text-gray-900">
-          ${i.title}
-          <span class="ml-2 text-xs px-2 py-0.5 rounded-full ${
-            i.status === 'major'
-              ? 'bg-red-100 text-red-700'
-              : i.status === 'partial'
-              ? 'bg-orange-100 text-orange-700'
-              : i.status === 'degraded'
-              ? 'bg-yellow-100 text-yellow-700'
-              : 'bg-gray-100 text-gray-700'
-          }">
-            ${labelFor(i.status)}
-          </span>
-        </p>
+          const cleanMessage = msgIsEmpty ? "" : escapeHtml(rawMsg);
 
-        ${
-          cleanMessage
-            ? `<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
-                 ${cleanMessage}
-               </p>`
-            : ''
-        }
+          const updates = Array.isArray(i.updates) ? i.updates : [];
+          const updatesFiltered = updates
+            .filter((u) => (u?.body || "").trim())
+            .filter((u) => {
+              const b = (u.body || "").trim().toLowerCase();
+              return b !== "no response" && b !== "_no response_";
+            });
 
-        ${
-          i.services && i.services.length
-            ? `<p class="mt-2 text-xs text-gray-500">
-                 Serviços afetados: ${i.services.join(', ')}
-               </p>`
-            : ''
-        }
+          const updatesHtml =
+            updatesFiltered.length > 0
+              ? `
+                <div class="mt-3">
+                  <p class="text-xs font-semibold text-gray-600">Atualizações</p>
+                  <div class="mt-2 space-y-2">
+                    ${updatesFiltered
+                      .slice(-5)
+                      .reverse()
+                      .map((u) => {
+                        const author = escapeHtml(u.author || "");
+                        const body = escapeHtml(u.body || "");
+                        const when = formatPtBr(u.created_at || u.updated_at || new Date().toISOString());
+                        return `
+                          <div class="p-2 rounded-md bg-white border border-gray-200">
+                            <p class="text-sm text-gray-800 whitespace-pre-line">${body}</p>
+                            <p class="mt-1 text-[11px] text-gray-400">${author} • ${when}</p>
+                          </div>
+                        `;
+                      })
+                      .join("")}
+                  </div>
+                </div>
+              `
+              : "";
 
-        <p class="mt-1 text-xs text-gray-400">
-          Atualizado em ${formatPtBr(i.updated_at || i.timestamp)}
-        </p>
-      </div>
-    `;
-  })
-  .join('');
+          const badgeClass =
+            i.status === "major"
+              ? "bg-red-100 text-red-700"
+              : i.status === "partial"
+              ? "bg-orange-100 text-orange-700"
+              : i.status === "degraded"
+              ? "bg-yellow-100 text-yellow-700"
+              : i.status === "maintenance"
+              ? "bg-purple-100 text-purple-700"
+              : "bg-gray-100 text-gray-700";
+
+          return `
+            <div class="mt-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+              <p class="font-semibold text-gray-900">
+                ${escapeHtml(i.title)}
+                <span class="ml-2 text-xs px-2 py-0.5 rounded-full ${badgeClass}">
+                  ${labelFor(i.status)}
+                </span>
+              </p>
+
+              ${cleanMessage ? `<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">${cleanMessage}</p>` : ""}
+
+              ${
+                i.services && i.services.length
+                  ? `<p class="mt-2 text-xs text-gray-500">
+                       Serviços afetados: ${escapeHtml(i.services.join(", "))}
+                     </p>`
+                  : ""
+              }
+
+              ${updatesHtml}
+
+              <p class="mt-2 text-xs text-gray-400">
+                Atualizado em ${formatPtBr(i.updated_at || i.timestamp)}
+              </p>
+            </div>
+          `;
+        })
+        .join("");
 
       const lastTime =
         activeIncidents[0].updated_at ||
@@ -841,13 +887,28 @@
         const data = await loadStatus();
         applyStatus(data);
       } catch (e) {
-        const overallTitle = document.getElementById('overall-status-title');
-        const overallSubtitle = document.getElementById('overall-status-subtitle');
-        overallTitle.textContent = 'Erro ao carregar status';
-        overallSubtitle.textContent = 'Tente novamente mais tarde';
+        const overallTitle = document.getElementById("overall-status-title");
+        const overallSubtitle = document.getElementById("overall-status-subtitle");
+        overallTitle.textContent = "Erro ao carregar status";
+        overallSubtitle.textContent = "Tente novamente mais tarde";
         console.error(e);
       }
     }
+
+    // Busca (filtra linhas de serviço por nome)
+    (function setupSearch() {
+      const input = document.getElementById("service-search");
+      if (!input) return;
+
+      input.addEventListener("input", () => {
+        const q = (input.value || "").toLowerCase().trim();
+        const rows = document.querySelectorAll("[data-service-row]");
+        rows.forEach((row) => {
+          const name = (row.getAttribute("data-service-row") || "").toLowerCase();
+          row.style.display = !q || name.includes(q) ? "" : "none";
+        });
+      });
+    })();
 
     updateDateTime();
     refresh();
