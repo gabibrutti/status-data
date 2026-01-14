@@ -7,7 +7,7 @@
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
-    "Under Control (Painel administrativo)": "degraded",
+    "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": [
@@ -23,5 +23,5 @@
       "url": "https://github.com/gabibrutti/status-data/issues/8"
     }
   ],
-  "last_updated": "2026-01-14T04:47:36.934Z"
+  "last_updated": "2026-01-14T05:06:57.377Z"
 }
