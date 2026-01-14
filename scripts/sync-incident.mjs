@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+// Lista exata dos serviços permitidos
 const ALLOWED_SERVICES = [
   "Interconexão entre Data Centers (SP1 e SP2)",
   "Datacenter SP2",
@@ -13,9 +14,10 @@ const ALLOWED_SERVICES = [
 ];
 
 async function run() {
+  // Captura os dados da issue enviados pelo Workflow
   const issue = JSON.parse(process.env.ISSUE_CONTEXT);
 
-  // 1. Filtro por Título
+  // 1. Filtro: Só processa se o título começar com [INCIDENTE]
   if (!issue.title.startsWith('[INCIDENTE]')) {
     console.log('Ignorado: Não é um incidente.');
     return;
@@ -24,6 +26,7 @@ async function run() {
   const statusPath = './status.json';
   let statusData = { services: {}, incidents: [] };
 
+  // Carrega o status.json atual se ele existir
   if (fs.existsSync(statusPath)) {
     statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
   }
@@ -36,22 +39,24 @@ async function run() {
   const severity = severityMatch ? severityMatch[1].trim().toLowerCase() : 'investigating';
   const rawServices = servicesMatch ? servicesMatch[1].split(',').map(s => s.trim()) : [];
 
-  // Filtrar apenas serviços da sua lista oficial
+  // Filtra para garantir que só usaremos serviços da lista oficial
   const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
   const isClosed = issue.state === 'closed';
 
-  // 3. Atualizar Status dos Serviços no JSON
+  // 3. Atualiza o Status dos Serviços no JSON
   ALLOWED_SERVICES.forEach(service => {
     if (affectedServices.includes(service)) {
+      // Se a issue foi fechada, volta para operational, senão usa a severidade
       statusData.services[service] = isClosed ? "operational" : severity;
     } else if (!statusData.services[service]) {
+      // Garante que serviços novos comecem como operational
       statusData.services[service] = "operational";
     }
   });
 
-  // 4. Gravação do Arquivo (A antiga linha 75 do erro)
+  // 4. Salva o arquivo (resolve o erro da linha 75 que você teve)
   fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-  console.log('status.json atualizado com sucesso.');
+  console.log('Arquivo status.json atualizado com sucesso.');
 }
 
 run().catch(err => {
