@@ -179,7 +179,7 @@ async function main() {
   const next = {
     last_updated: new Date().toISOString(),
     services,
-    incidents: incidents.slice(0, 50),
+    incidents: openIncidents.slice(0, 50), // só abertos
   };
 
   await fs.writeFile(STATUS_PATH, JSON.stringify(next, null, 2) + "\n", "utf8");
