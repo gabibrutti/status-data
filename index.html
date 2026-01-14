@@ -683,7 +683,49 @@
             const serviceEls = document.querySelectorAll('[data-service-status]');
             for (const el of serviceEls) {
                 const key = el.getAttribute('data-service-status');
-                el.textContent = labelFor(services[key] || 'operational');
+                const status = services[key] || 'operational';
+                el.textContent = labelFor(status);
+                
+                // Atualizar cor do texto do status
+                const statusColors = {
+                    operational: 'text-green-600',
+                    degraded: 'text-yellow-600',
+                    partial: 'text-orange-600',
+                    major: 'text-red-600',
+                    maintenance: 'text-purple-600'
+                };
+                el.className = `font-medium ${statusColors[status] || 'text-green-600'}`;
+            }
+            
+            // Atualizar aparência visual dos serviços (barras de progresso e cards)
+            const serviceRows = document.querySelectorAll('[data-service-row]');
+            for (const row of serviceRows) {
+                const serviceName = row.getAttribute('data-service-row');
+                const status = services[serviceName] || 'operational';
+                
+                // Encontrar a barra de progresso dentro do card
+                const progressBar = row.querySelector('.bg-green-500, .bg-yellow-500, .bg-orange-500, .bg-red-500, .bg-purple-500');
+                if (progressBar) {
+                    // Remover todas as classes de cor
+                    progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-orange-500', 'bg-red-500', 'bg-purple-500');
+                    
+                    // Adicionar a cor apropriada baseada no status
+                    const barColors = {
+                        operational: 'bg-green-500',
+                        degraded: 'bg-yellow-500',
+                        partial: 'bg-orange-500',
+                        major: 'bg-red-500',
+                        maintenance: 'bg-purple-500'
+                    };
+                    progressBar.classList.add(barColors[status] || 'bg-green-500');
+                }
+                
+                // Adicionar destaque visual ao card se não estiver operacional
+                if (status !== 'operational') {
+                    row.classList.add('bg-yellow-50', 'border-l-4', 'border-yellow-400');
+                } else {
+                    row.classList.remove('bg-yellow-50', 'border-l-4', 'border-yellow-400', 'bg-orange-50', 'border-orange-400', 'bg-red-50', 'border-red-400');
+                }
             }
 
             const groups = {};
