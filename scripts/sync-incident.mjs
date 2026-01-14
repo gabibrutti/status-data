@@ -13,28 +13,6 @@ const ALLOWED_SERVICES = [
 ];
 
 async function run() {
-  // CORREÇÃO: Verifica se o contexto da Issue existe antes de tentar processar
-  if (!process.env.ISSUE_CONTEXT || process.env.ISSUE_CONTEXT === 'null') {
-    console.log('Aviso: Nenhum contexto de Issue encontrado (possível execução manual).');
-    return;
-  }
-
-  const issue = JSON.parse(process.env.ISSUE_CONTEXT);
-
-  // CORREÇÃO: Garante que o objeto issue e o número existam (evita o erro da linha 17)
-  if (!issue || !issue.number) {
-    console.log('Erro: Dados da Issue inválidos no contexto.');
-    return;
-  }
-
-  console.log(`Processando Issue #${issue.number}: ${issue.title}`);
-
-  // Ignora issues que não são incidentes
-  if (!issue.title.toUpperCase().includes('[INCIDENTE]')) {
-    console.log('Abortado: Título não contém [INCIDENTE]');
-    return;
-  }
-
   const statusPath = './status.json';
   let statusData = {
     last_updated: new Date().toISOString(),
@@ -42,17 +20,37 @@ async function run() {
     incidents: []
   };
 
-  // Carrega o arquivo atual se existir
   if (fs.existsSync(statusPath)) {
     try {
       statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
     } catch (e) {
-      console.log('Erro ao ler status.json, criando um novo.');
+      console.log('Criando novo status.json');
     }
   }
 
-  statusData.last_updated = new Date().toISOString();
+  // Verifica se o script foi rodado por uma Issue ou manualmente
+  const issueContext = process.env.ISSUE_CONTEXT;
+  if (!issueContext || issueContext === 'null') {
+    console.log('Execução manual detectada: Resetando status para Operacional.');
+    
+    // Reset de segurança: se rodar manual, limpamos incidentes e voltamos serviços para operacional
+    statusData.incidents = [];
+    ALLOWED_SERVICES.forEach(s => statusData.services[s] = "operational");
+    statusData.last_updated = new Date().toISOString();
+    
+    fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
+    return;
+  }
 
+  const issue = JSON.parse(issueContext);
+  console.log(`Processando Issue #${issue.number}: ${issue.title}`);
+
+  if (!issue.title.toUpperCase().includes('[INCIDENTE]')) {
+    console.log('Abortado: Título não contém [INCIDENTE]');
+    return;
+  }
+
+  statusData.last_updated = new Date().toISOString();
   const body = issue.body || "";
   
   const extractSection = (title) => {
@@ -63,33 +61,19 @@ async function run() {
 
   const severityRaw = extractSection('Severidade');
   const servicesRaw = extractSection('Serviços afetados');
-  
   const severity = severityRaw.toLowerCase() || 'investigating';
   const rawServices = servicesRaw.split(/[\n,]+/).map(s => s.trim()).filter(s => s !== "");
 
   const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
   const isClosed = issue.state === 'closed';
 
-  // Atualiza o estado individual dos serviços
-  ALLOWED_SERVICES.forEach(service => {
-    if (affectedServices.includes(service)) {
-      statusData.services[service] = isClosed ? "operational" : severity;
-    } else if (!statusData.services[service]) {
-      statusData.services[service] = "operational";
-    }
-  });
-
   const incidentIndex = statusData.incidents.findIndex(i => i.id === issue.number);
   
-  // LÓGICA DE LIMPEZA: Se a issue foi fechada ou deletada, removemos do array de incidentes
-  // Isso garante que o banner de "Incidente em andamento" suma do site.
-  if (issue.state === 'deleted' || isClosed) {
+  if (isClosed || issue.state === 'deleted') {
     if (incidentIndex > -1) {
       statusData.incidents.splice(incidentIndex, 1);
-      console.log(`Incidente #${issue.number} removido (Resolvido/Fechado).`);
     }
   } else {
-    // Adiciona ou atualiza incidente ativo
     const incidentObj = {
       id: issue.number,
       title: issue.title.replace(/\[INCIDENTE\]/i, '').trim(),
@@ -107,16 +91,17 @@ async function run() {
     }
   }
 
-  // Validação final: Se não houver mais incidentes, todos os serviços DEVEM ser operacionais
-  if (statusData.incidents.length === 0) {
-    ALLOWED_SERVICES.forEach(s => statusData.services[s] = "operational");
-  }
+  // Atualiza serviços baseado nos incidentes que sobraram
+  ALLOWED_SERVICES.forEach(service => {
+    const activeForService = statusData.incidents.find(inc => inc.services.includes(service));
+    statusData.services[service] = activeForService ? activeForService.severity : "operational";
+  });
 
   fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-  console.log('Sucesso: status.json atualizado com segurança.');
+  console.log('Sucesso: status.json atualizado.');
 }
 
 run().catch(err => {
-  console.error('ERRO CRÍTICO NO SCRIPT:', err);
+  console.error('ERRO CRÍTICO:', err);
   process.exit(1);
 });
