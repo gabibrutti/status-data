@@ -1,57 +1,15 @@
 {
-  "last_updated": "2026-01-14T17:25:53.062Z",
+  "last_updated": "2026-01-14T17:28:58.089Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
-    "Datacenter SP1": "major",
+    "Datacenter SP1": "operational",
     "ACS (Apache Cloud Stack)": "operational",
-    "vCloud": "major",
-    "Central Telefônica": "partial",
+    "vCloud": "operational",
+    "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [
-    {
-      "id": 17,
-      "title": "teste issue",
-      "status": "major",
-      "state": "open",
-      "services": [
-        "vCloud",
-        "Datacenter SP1"
-      ],
-      "message": "teste\n\n_No response_",
-      "timestamp": "2026-01-14T17:25:44Z",
-      "updated_at": "2026-01-14T17:25:44Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/17"
-    },
-    {
-      "id": 16,
-      "title": "teste gabi",
-      "status": "partial",
-      "state": "open",
-      "services": [
-        "Central Telefônica",
-        "Datacenter SP1"
-      ],
-      "message": "rteste\n\n_No response_",
-      "timestamp": "2026-01-14T17:22:26Z",
-      "updated_at": "2026-01-14T17:22:26Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/16"
-    },
-    {
-      "id": 15,
-      "title": "Dificuldade de conexão",
-      "status": "partial",
-      "state": "open",
-      "services": [
-        "vCloud"
-      ],
-      "message": "Estamos recebendo reportes de dificuldade de conexão...\n\n_No response_",
-      "timestamp": "2026-01-14T17:18:59Z",
-      "updated_at": "2026-01-14T17:18:59Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/15"
-    }
-  ]
+  "incidents": []
 }
