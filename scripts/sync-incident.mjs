@@ -1,6 +1,9 @@
-import fs from 'fs';
+import fs from "node:fs/promises";
+import path from "node:path";
 
-const ALLOWED_SERVICES = [
+const STATUS_PATH = path.resolve("status.json");
+
+const SUPPORTED_SERVICES = [
   "Interconexão entre Data Centers (SP1 e SP2)",
   "Datacenter SP2",
   "Datacenter SP1",
@@ -9,96 +12,155 @@ const ALLOWED_SERVICES = [
   "Central Telefônica",
   "Freshservice (painel de chamados)",
   "Under Control (Painel administrativo)",
-  "VPN - Gerência console servidores físico Under"
+  "VPN - Gerência console servidores físico Under",
 ];
+const SUPPORTED_SERVICES_SET = new Set(SUPPORTED_SERVICES);
 
-async function run() {
-  const statusPath = './status.json';
-  let statusData = {
-    last_updated: new Date().toISOString(),
-    services: {},
-    incidents: []
-  };
+const token = process.env.GITHUB_TOKEN;
+const repo = process.env.GITHUB_REPOSITORY;
 
-  if (fs.existsSync(statusPath)) {
-    try {
-      statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
-    } catch (e) {
-      console.log('Criando novo status.json');
-    }
-  }
-
-  const issueContext = process.env.ISSUE_CONTEXT;
-  if (!issueContext || issueContext === 'null') {
-    console.log('Execução manual detectada: Resetando status para Operacional.');
-    statusData.incidents = [];
-    ALLOWED_SERVICES.forEach(s => statusData.services[s] = "operational");
-    statusData.last_updated = new Date().toISOString();
-    fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-    return;
-  }
-
-  const issue = JSON.parse(issueContext);
-  console.log(`Processando Issue #${issue.number}: ${issue.title}`);
-
-  if (!issue.title.toUpperCase().includes('[INCIDENTE]')) {
-    console.log('Abortado: Título não contém [INCIDENTE]');
-    return;
-  }
-
-  statusData.last_updated = new Date().toISOString();
-  const body = issue.body || "";
-  
-  const extractSection = (title) => {
-    const regex = new RegExp(`### ${title}\\s*[\\r\\n]+([\\s\\S]*?)(?:\\n###|$)`, 'i');
-    const match = body.match(regex);
-    return match ? match[1].trim() : "";
-  };
-
-  const severityRaw = extractSection('Severidade');
-  const servicesRaw = extractSection('Serviços afetados');
-  const severity = severityRaw.toLowerCase() || 'investigating';
-  const rawServices = servicesRaw.split(/[\n,]+/).map(s => s.trim()).filter(s => s !== "");
-
-  const affectedServices = rawServices.filter(s => ALLOWED_SERVICES.includes(s));
-  // Correção: Verifica tanto o estado 'closed' quanto o motivo 'completed'
-  const isClosed = issue.state === 'closed' || issue.state_reason === 'completed';
-
-  const incidentIndex = statusData.incidents.findIndex(i => i.id === issue.number);
-  
-  if (isClosed || issue.state === 'deleted') {
-    if (incidentIndex > -1) {
-      statusData.incidents.splice(incidentIndex, 1);
-      console.log(`Incidente #${issue.number} removido.`);
-    }
-  } else {
-    const incidentObj = {
-      id: issue.number,
-      title: issue.title.replace(/\[INCIDENTE\]/i, '').trim(),
-      status: severity,
-      severity: severity,
-      services: affectedServices,
-      last_update: new Date().toISOString(),
-      url: issue.html_url
-    };
-
-    if (incidentIndex > -1) {
-      statusData.incidents[incidentIndex] = incidentObj;
-    } else {
-      statusData.incidents.unshift(incidentObj);
-    }
-  }
-
-  ALLOWED_SERVICES.forEach(service => {
-    const activeForService = statusData.incidents.find(inc => inc.services.includes(service));
-    statusData.services[service] = activeForService ? activeForService.severity : "operational";
-  });
-
-  fs.writeFileSync(statusPath, JSON.stringify(statusData, null, 2));
-  console.log('Sucesso: status.json atualizado.');
+if (!token) {
+  throw new Error("Missing GITHUB_TOKEN");
+}
+if (!repo) {
+  throw new Error("Missing GITHUB_REPOSITORY");
 }
 
-run().catch(err => {
-  console.error('ERRO CRÍTICO:', err);
-  process.exit(1);
-});
+const priority = {
+  operational: 0,
+  degraded: 1,
+  maintenance: 2,
+  partial: 3,
+  major: 4,
+};
+
+function extractSection(body, heading) {
+  if (!body) return "";
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`###\\s+${escaped}\\s*\\n+([\\s\\S]*?)(?=\\n###\\s|$)`, "i");
+  const m = body.match(re);
+  return (m?.[1] ?? "").trim();
+}
+
+function parseIssueForm(body) {
+  const severityRaw = extractSection(body, "Severidade").split("\n")[0].trim();
+  const servicesRaw = extractSection(body, "Serviços afetados");
+  const description = extractSection(body, "Descrição do incidente");
+  const update = extractSection(body, "Atualização (opcional)");
+
+  const services = servicesRaw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => l.replace(/^[-*]\s+/, ""));
+
+  const mappedServices = services.filter((s) => SUPPORTED_SERVICES_SET.has(s));
+
+  const severity = ["degraded", "partial", "major", "maintenance"].includes(severityRaw)
+    ? severityRaw
+    : "degraded";
+
+  const message = [description, update].filter(Boolean).join("\n\n");
+
+  return { severity, services: mappedServices, message };
+}
+
+async function githubRequest(url) {
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`GitHub API error ${res.status}: ${text}`);
+  }
+
+  return await res.json();
+}
+
+async function listAllIssues() {
+  // Get up to 100 most recent issues (enough for a simple status page)
+  const url = `https://api.github.com/repos/${repo}/issues?state=all&per_page=100&sort=created&direction=desc`;
+  const issues = await githubRequest(url);
+  return issues.filter((i) => !i.pull_request);
+}
+
+function isTrustedIssue(issue) {
+  const assoc = (issue?.author_association || "").toUpperCase();
+  return assoc === "OWNER" || assoc === "MEMBER" || assoc === "COLLABORATOR";
+}
+
+function isIncidentIssue(issue) {
+  const title = (issue?.title || "").trim();
+  return /^\[INCIDENTE\]/i.test(title);
+}
+
+function computeOverallServices(baseServices, openIncidents) {
+  const next = {};
+  for (const s of Object.keys(baseServices)) next[s] = "operational";
+
+  for (const inc of openIncidents) {
+    const sev = inc.status;
+    for (const s of inc.services) {
+      if ((priority[sev] ?? 0) > (priority[next[s]] ?? 0)) {
+        next[s] = sev;
+      }
+    }
+  }
+
+  return next;
+}
+
+function toIncidentRecord(issue) {
+  const parsed = parseIssueForm(issue.body || "");
+
+  return {
+    id: issue.number,
+    title: issue.title,
+    status: issue.state === "open" ? parsed.severity : "operational",
+    state: issue.state,
+    services: parsed.services,
+    message: parsed.message,
+    timestamp: issue.created_at,
+    updated_at: issue.updated_at,
+    url: issue.html_url,
+  };
+}
+
+async function main() {
+  let current = { services: {}, incidents: [] };
+  try {
+    const raw = await fs.readFile(STATUS_PATH, "utf8");
+    current = JSON.parse(raw);
+  } catch {
+    // ignore
+  }
+
+  const baseServices = {};
+  for (const s of SUPPORTED_SERVICES) {
+    baseServices[s] = "operational";
+  }
+
+  const issues = await listAllIssues();
+  const incidents = issues
+    .filter(isTrustedIssue)
+    .filter(isIncidentIssue)
+    .map(toIncidentRecord)
+    .filter((i) => i.services.length > 0 && i.message.length > 0);
+
+  const openIncidents = incidents.filter((i) => i.state === "open");
+  const services = computeOverallServices(baseServices, openIncidents);
+
+  const next = {
+    services,
+    incidents: incidents.slice(0, 50),
+  };
+
+  await fs.writeFile(STATUS_PATH, JSON.stringify(next, null, 2) + "\n", "utf8");
+}
+
+await main();
