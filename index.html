@@ -539,9 +539,19 @@
   </div>
 
   <script>
-  
-  // ✅ Busca SEMPRE o JSON do MESMO domínio da página (status.under.com.br)
-  const STATUS_URL = `/status.json?t=${Date.now()}`;
+    // ✅ Polyfill CSS.escape (evita quebra com acentos/parênteses em alguns ambientes)
+    if (!window.CSS) window.CSS = {};
+    if (typeof window.CSS.escape !== "function") {
+      window.CSS.escape = function (value) {
+        return String(value).replace(/[^a-zA-Z0-9_\u00A0-\uFFFF-]/g, function (ch) {
+          return "\\" + ch;
+        });
+      };
+    }
+
+    // ✅ Busca SEMPRE o JSON do MESMO domínio da página
+    // (sem query aqui; o cache-buster vai ser aplicado no loadStatus)
+    const STATUS_URL = "/status.json";
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -604,7 +614,8 @@
     }
 
     async function loadStatus() {
-      const url = new URL(STATUS_URL);
+      // ✅ IMPORTANTE: URL relativo precisa de base
+      const url = new URL(STATUS_URL, window.location.href);
       url.searchParams.set("t", Date.now().toString()); // cache buster
       const res = await fetch(url.toString(), { cache: "no-store" });
       if (!res.ok) throw new Error(`Não foi possível carregar status.json (${res.status})`);
@@ -752,7 +763,7 @@
         if (txt) txt.textContent = labelFor(groupStatus);
       }
 
-      // === Incidents Summary + Updates (comentários) ===
+      // === Incidents Summary + Updates ===
       const summaryTitle = document.getElementById("incidents-summary-title");
       const summaryDescription = document.getElementById("incidents-summary-description");
       const summaryTime = document.getElementById("incidents-summary-time");
