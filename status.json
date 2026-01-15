@@ -1,14 +1,15 @@
 {
-  "last_updated": "2026-01-15T19:30:00.000Z",
+  "last_updated": "2026-01-15T19:30:35.240Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
-    "ACS (Apache CloudStack)": "operational",
+    "ACS (Apache Cloud Stack)": "operational",
+    "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
-    "VPN - Gerência console servidores fisico Under": "operational"
+    "VPN - Gerência console servidores físico Under": "operational"
   },
   "incidents": []
 }
