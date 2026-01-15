@@ -1,10 +1,11 @@
 {
-  "last_updated": "2026-01-15T19:20:03.247Z",
+  "last_updated": "2026-01-15T19:23:05.562Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
-    "ACS (Apache Cloud Stack)": "operational",  
+    "ACS (Apache Cloud Stack)": "operational",
+    "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
