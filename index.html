@@ -539,9 +539,9 @@
   </div>
 
   <script>
-    // ✅ Busca SEMPRE o JSON correto (repo status-data)
-    const DATA_ORIGIN = "https://gabibrutti.github.io/status-data";
-    const STATUS_URL = `${DATA_ORIGIN}/status.json`;
+  
+  // ✅ Busca SEMPRE o JSON do MESMO domínio da página (status.under.com.br)
+  const STATUS_URL = `/status.json?t=${Date.now()}`;
 
     function escapeHtml(str) {
       return String(str ?? "")
