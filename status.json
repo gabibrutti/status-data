@@ -1,30 +1,15 @@
 {
-  "last_updated": "2026-05-14T12:54:37.046Z",
+  "last_updated": "2026-05-14T13:08:10.794Z",
   "services": {
     "Interconexão entre Data Centers (SP1 e SP2)": "operational",
     "Datacenter SP2": "operational",
     "Datacenter SP1": "operational",
-    "ACS (Apache Cloud Stack)": "partial",
+    "ACS (Apache Cloud Stack)": "operational",
     "vCloud": "operational",
     "Central Telefônica": "operational",
     "Freshservice (painel de chamados)": "operational",
     "Under Control (Painel administrativo)": "operational",
     "VPN - Gerência console servidores físico Under": "operational"
   },
-  "incidents": [
-    {
-      "id": 24,
-      "title": "Instabilidade no ACS",
-      "status": "partial",
-      "state": "open",
-      "services": [
-        "ACS (Apache Cloud Stack)"
-      ],
-      "message": "Indentificamos uma incosistência de login ao painel de gerenciamento do ACS, nossa infraestrutura já está analisando.\n\nObs: As vm's continuam operando sem intermitências.\n\n_No response_",
-      "updates": [],
-      "timestamp": "2026-05-14T12:53:42Z",
-      "updated_at": "2026-05-14T12:53:42Z",
-      "url": "https://github.com/gabibrutti/status-data/issues/24"
-    }
-  ]
+  "incidents": []
 }
